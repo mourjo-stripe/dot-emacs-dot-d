@@ -496,6 +496,13 @@
   :delight)
 
 
+;; Highlight symbol at point
+(use-package idle-highlight-mode
+  :ensure t
+  :config (progn (add-hook 'clojure-mode-hook (lambda ()  (idle-highlight-mode t)))
+                 (add-hook 'emacs-lisp-mode-hook (lambda ()  (idle-highlight-mode t)))))
+
+
 
 (use-package paredit
   :doc "Better handling of paranthesis when writing Lisp"

@@ -56,7 +56,8 @@
 ;; Make the command key behave as 'meta'
 (when (eq system-type 'darwin)
   (setq mac-command-modifier 'meta)
-  (setq mac-right-command-modifier 'hyper))
+  (setq mac-right-command-modifier 'hyper)
+  (setq delete-by-moving-to-trash t))
 
 
 ;; Unbind `save-buffers-kill-terminal` to avoid accidentally quiting Emacs.
@@ -219,6 +220,7 @@
   :config
   (setq recentf-auto-cleanup 'never
         recentf-max-saved-items 1000
+        recentf-max-menu-items 1000
         recentf-save-file (concat user-emacs-directory ".recentf"))
   (recentf-mode t)
   :delight)
@@ -297,18 +299,17 @@
               ("M-K" . helm-next-page)
               ("M-h" . helm-beginning-of-buffer)
               ("M-H" . helm-end-of-buffer))
-  :config (progn
-            (setq helm-buffers-fuzzy-matching t
-                  helm-recentf-fuzzy-match t
-                  helm-apropos-fuzzy-match t
-                  helm-M-x-fuzzy-match t
-                  helm-imenu-fuzzy-match t
-                  helm-mode-fuzzy-match t
-                  helm-completion-in-region-fuzzy-match t
-                  helm-candidate-number-limit 100
-                  helm-split-window-default-side 'below
-                  helm-full-frame nil)
-            (helm-mode 1))
+  :init (setq helm-buffers-fuzzy-matching t
+              helm-recentf-fuzzy-match t
+              helm-apropos-fuzzy-match t
+              helm-M-x-fuzzy-match t
+              helm-imenu-fuzzy-match t
+              helm-mode-fuzzy-match t
+              helm-completion-in-region-fuzzy-match t
+              helm-candidate-number-limit 100
+              helm-split-window-default-side 'below
+              helm-full-frame nil)
+  :config (progn (helm-mode 1))
   :delight)
 
 
@@ -574,35 +575,6 @@
   ;; Java classes (e.g. JavaClassName)
   (add-hook 'clojure-mode-hook #'subword-mode)
 
-  ;; Show 'ƒ' instead of 'fn' in clojure mode
-  (defun prettify-fns ()
-    (font-lock-add-keywords
-     nil `(("(\\(fn\\)[\[[:space:]]"
-            (0 (progn (compose-region (match-beginning 1) (match-end 1)
-                                      "ƒ")
-                      nil))))))
-  (add-hook 'clojure-mode-hook 'prettify-fns)
-  (add-hook 'cider-repl-mode-hook 'prettify-fns)
-
-  ;; Show lambda instead of '#' in '#(...)'
-  (defun prettify-anonymous-fns ()
-    (font-lock-add-keywords
-     nil `(("\\(#\\)("
-            (0 (progn (compose-region (match-beginning 1) (match-end 1)
-                                      ,(make-char 'greek-iso8859-7 107))
-                      nil))))))
-  (add-hook 'clojure-mode-hook 'prettify-anonymous-fns)
-  (add-hook 'cider-repl-mode-hook 'prettify-anonymous-fns)
-
-  ;; Show '∈' instead of '#' in '#{}' (sets)
-  (defun prettify-sets ()
-    (font-lock-add-keywords
-     nil `(("\\(#\\){"
-            (0 (progn (compose-region (match-beginning 1) (match-end 1)
-                                      "∈")
-                      nil))))))
-  (add-hook 'clojure-mode-hook 'prettify-sets)
-  (add-hook 'cider-repl-mode-hook 'prettify-sets)
   :delight)
 
 (use-package clojure-mode-extra-font-locking
@@ -734,6 +706,9 @@
 ;; ──────────────────────────────────── Custom config ───────────────────────────────────
 
 (setq ring-bell-function 'ignore)
+(setq confirm-nonexistent-file-or-buffer nil)
+(set-default 'truncate-lines t)
+
 (global-set-key (kbd "C-a") 'back-to-indentation-or-beginning-of-line)
 (global-set-key (kbd "C-7") 'comment-or-uncomment-current-line-or-region)
 (global-set-key (kbd "C-6") 'linum-mode)
@@ -752,6 +727,21 @@
 (global-set-key (kbd "C-c s") 'swap-windows)
 (global-set-key (kbd "C-c r") 'rename-buffer-and-file)
 
+
+(require 'saveplace)
+(save-place-mode)
+
+
+;; Smooth scrolling
+(setq redisplay-dont-pause t
+      scroll-margin 1
+      scroll-step 1
+      scroll-conservatively 10000
+      scroll-preserve-screen-position 1)
+
+
+(setq display-time-24hr-format nil)
+(display-time-mode +1)
 
 
 ;; ──────────────────────────────────── Look and feel ───────────────────────────────────
@@ -840,7 +830,16 @@
     (when (member "Fantasque Sans Mono" (font-family-list))
       (set-frame-font "Fantasque Sans Mono"))))
 
+(when window-system (set-frame-size (selected-frame) 165 80))
 
+
+(defun copy-reference ()
+  "Copy current line in file to clipboard as '</path/to/file>:<line-number>'."
+  (interactive)
+  (let ((path-with-line-number
+         (concat (buffer-file-name) ":" (number-to-string (line-number-at-pos)))))
+    (kill-new path-with-line-number)
+    (message (concat path-with-line-number " copied to clipboard"))))
 
 
 ;; ──────────────────────────────────────── *ORG* ───────────────────────────────────────
@@ -849,6 +848,9 @@
 ;; Open agenda view when Emacs is started.
 ;; (jump-to-org-agenda)
 ;; (delete-other-windows)
+
+(with-eval-after-load 'org (setq org-startup-indented t))
+(add-hook 'org-mode-hook 'turn-on-auto-fill)
 
 (provide 'init)
 

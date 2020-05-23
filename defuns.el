@@ -290,5 +290,11 @@ them. These include the path relative to the project root."
       (set-frame-font "Fantasque Sans Mono"))))
 
 
+(defun find-user-init-file ()
+  "Edit the `user-init-file'"
+  (interactive)
+  (find-file user-init-file))
+
+
 (provide 'defuns)
 ;;; defuns.el ends here

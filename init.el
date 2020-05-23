@@ -484,15 +484,7 @@
 
   :delight)
 
-(use-package company-emoji
-  :ensure t
-  :config
-  (add-to-list 'company-backends 'company-emoji)
-  (if (version< "27.0" emacs-version)
-      (set-fontset-font
-       "fontset-default" 'unicode "Apple Color Emoji" nil 'prepend)
-    (set-fontset-font t 'symbol (font-spec :family "Apple Color Emoji")
-                      nil 'prepend)))
+
 
 (use-package paredit
   :doc "Better handling of paranthesis when writing Lisp"
@@ -511,6 +503,27 @@
   :bind (("M-[" . paredit-wrap-square)
          ("M-{" . paredit-wrap-curly))
   :delight)
+
+
+(use-package paxedit
+  :ensure t
+  :init (add-hook 'clojure-mode-hook 'paxedit-mode)
+        (add-hook 'emacs-lisp-mode-hook 'paxedit-mode)
+  :bind (("M-<right>" . paxedit-transpose-forward)
+         ("M-<left>". paxedit-transpose-backward)
+         ("M-<up>" . paxedit-backward-up)
+         ("M-<down>" . paxedit-backward-end)
+         ("M-b" . paxedit-previous-symbol)
+         ("M-f" . paxedit-next-symbol)
+         ("C-%" . paxedit-copy)
+         ("C-&" . paxedit-kill)
+         ("C-*" . paxedit-delete)
+         ("C-^" . paxedit-sexp-raise)
+         ("M-u" . paxedit-symbol-change-case)
+         ("C-@" . paxedit-symbol-copy)
+         ("C-#" . paxedit-symbol-kill))
+  :delight)
+
 
 (use-package rainbow-delimiters
   :doc "Colorful paranthesis matching"

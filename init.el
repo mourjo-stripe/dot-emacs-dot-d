@@ -240,6 +240,8 @@
 (use-package magit
   :doc "Git integration for Emacs"
   :ensure t
+  :config (add-hook 'magit-mode-hook
+                    (lambda () (hl-line-mode -1)))
   :bind ("C-x g" . magit-status)
   :delight)
 
@@ -419,6 +421,10 @@
         ("C-c h" . mc-hide-unmatched-lines-mode)
         ("C-c l" . mc/edit-lines))
   :delight)
+
+(use-package expand-region
+  :ensure t
+  :bind ("C-=" . er/expand-region))
 
 (use-package async
   :doc "Simple library for asynchronous processing in Emacs")

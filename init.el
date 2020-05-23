@@ -91,10 +91,7 @@
 
   ;; Do not show scroll bar.
   (when (fboundp 'scroll-bar-mode)
-    (scroll-bar-mode -1))
-
-  ;; Highlight line on point.
-  (global-hl-line-mode t))
+    (scroll-bar-mode -1)))
 
 
 
@@ -400,12 +397,6 @@
   :ensure t
   :delight)
 
-(use-package region-bindings-mode
-  :doc "Define bindings only when a region is selected."
-  :ensure t
-  :config
-  (region-bindings-mode-enable)
-  :delight)
 
 (use-package multiple-cursors
   :doc "A minor mode for editing with multiple cursors"
@@ -414,12 +405,8 @@
   (setq mc/always-run-for-all t)
   :bind
   ;; Use multiple cursor bindings only when a region is active
-  (:map region-bindings-mode-map
-        ("C->" . mc/mark-next-like-this)
-        ("C-<" . mc/mark-previous-like-this)
-        ("C-c a" . mc/mark-all-like-this)
-        ("C-c h" . mc-hide-unmatched-lines-mode)
-        ("C-c l" . mc/edit-lines))
+  (("C->" . mc/mark-next-like-this)
+   ("C-<" . mc/mark-previous-like-this))
   :delight)
 
 (use-package expand-region
@@ -501,7 +488,6 @@
   :ensure t
   :config (progn (add-hook 'clojure-mode-hook (lambda ()  (idle-highlight-mode t)))
                  (add-hook 'emacs-lisp-mode-hook (lambda ()  (idle-highlight-mode t)))))
-
 
 
 (use-package paredit

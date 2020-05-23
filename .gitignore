@@ -2,7 +2,6 @@
 auto-save-list/
 backups/
 cider-history
-custom-file.el
 elpa/
 projectile-bookmarks.eld
 transient/

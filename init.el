@@ -738,6 +738,30 @@
   (global-eldoc-mode t)
   :delight)
 
+
+
+;; ──────────────────────────────────── Custom config ───────────────────────────────────
+
+
+(global-set-key (kbd "C-a") 'back-to-indentation-or-beginning-of-line)
+(global-set-key (kbd "C-7") 'comment-or-uncomment-current-line-or-region)
+(global-set-key (kbd "C-6") 'linum-mode)
+(global-set-key (kbd "C-v") 'scroll-up-five)
+(global-set-key (kbd "M-O") 'mode-line-other-buffer)
+(global-set-key (kbd "C-j") 'newline-and-indent)
+(global-set-key (kbd "M-g") 'goto-line)
+(global-set-key (kbd "M-n") 'open-line-below)
+(global-set-key (kbd "M-j") 'join-line-or-lines-in-region)
+(global-set-key (kbd "M-p") 'open-line-above)
+(global-set-key (kbd "M-+") 'text-scale-increase)
+(global-set-key (kbd "M-_") 'text-scale-decrease)
+(global-set-key (kbd "M-v") 'scroll-down-five)
+(global-set-key (kbd "M-k") 'kill-this-buffer)
+(global-set-key (kbd "M-o") 'other-window)
+(global-set-key (kbd "C-c s") 'swap-windows)
+(global-set-key (kbd "C-c r") 'rename-buffer-and-file)
+
+
 
 ;; ──────────────────────────────────── Look and feel ───────────────────────────────────
 (use-package monokai-alt-theme

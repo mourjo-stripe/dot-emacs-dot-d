@@ -176,32 +176,6 @@
 
 
 
-
-
-;; Thanks to Narendra Joshi.
-(defun upload-region (beg end)
-  "Upload the contents of the selected region in current buffer.
-   It uses transfer.sh Link to the uploaded file is copied to
-   clipboard.  Creates a temp file if the buffer isn't associted
-   witha file.  Argument BEG beginning point for region.
-   Argument END ending point for region."
-  (interactive "r")
-  (let* ((file-path (buffer-file-name))
-         (file-name (file-name-nondirectory file-path))
-         (upload-url (format "https://transfer.sh/%s"
-                             file-name))
-         (url-request-method "PUT")
-         (url-request-data (buffer-substring-no-properties beg end))
-         (url-callback (lambda (_)
-                         (search-forward "\n\n")
-                         (let ((url-link (buffer-substring (point)
-                                                           (point-max))))
-                           (kill-new url-link)
-                           (message "Link copied to clipboard: %s"
-                                    (s-trim url-link))
-                           (kill-buffer (current-buffer))))))
-    (url-retrieve upload-url url-callback)))
-
 ;; Start Emacsserver so that emacsclient can be used
 (server-start)
 
@@ -317,59 +291,6 @@
   (ivy-rich-mode 1)
   :delight)
 
-;; (use-package ivy-posframe
-;;   :doc "Custom positions for ivy buffers."
-;;   :ensure t
-;;   :config
-;;   (setq ivy-posframe-parameters
-;;         '((font . "Fira Code Retina")))
-
-;;   (setq ivy-posframe-display-functions-alist
-;;         '((complete-symbol . ivy-posframe-display-at-point)
-;;           (swiper . nil)
-;;           (swiper-isearch . nil)
-;;           (counsel-rg . nil)
-;;           (t . ivy-posframe-display-at-frame-center)))
-
-;;   (ivy-posframe-mode 1)
-
-;;   ;; Due to a bug in macOS, changing ivy-posframe-border background color does not
-;;   ;; work. Instead, go to the elisp file and change the background color to black.
-
-;;   :delight)
-
-;; (use-package swiper
-;;   :doc "A better search"
-;;   :ensure t
-;;   :bind (("C-s" . swiper-isearch)
-;;          ("H-s" . isearch-forward-regexp))
-;;   :delight)
-
-;; (use-package counsel
-;;   :doc "Ivy enhanced Emacs commands"
-;;   :ensure t
-;;   :bind (("M-x" . counsel-M-x)
-;;          ("C-x C-f" . counsel-find-file)
-;;          ("C-'" . counsel-imenu)
-;;          ("C-c s" . counsel-rg)
-;;          :map counsel-find-file-map
-;;          ("RET" . ivy-alt-done))
-;;   :delight)
-
-;; (use-package aggressive-indent
-;;   :doc "Intended Indentation"
-;;   :ensure t
-;;   :config
-;;   (add-hook 'before-save-hook 'aggressive-indent-indent-defun)
-;;   ;; Have a way to save without indentation.
-;;   ;; (defun save-without-aggresive-indentation ()
-;;   ;;   (interactive)
-;;   ;;   (remove-hook 'before-save-hook 'aggressive-indent-indent-defun)
-;;   ;;   (save-buffer)
-;;   ;;   (add-hook 'before-save-hook 'aggressive-indent-indent-defun))
-;;   ;; :bind (("C-x s" . save-without-aggresive-indentation))
-;;   :delight)
-
 (use-package git-gutter
   :doc "Shows modified lines"
   :ensure t
@@ -410,21 +331,8 @@
         ("C-c l" . mc/edit-lines))
   :delight)
 
-;; (use-package esup
-;;   :doc "Emacs Start Up Profiler (esup) benchmarks Emacs
-;;         startup time without leaving Emacs."
-;;   :ensure t
-;;   :delight)
-
-;; (use-package pdf-tools
-;;   :doc "Better pdf viewing"
-;;   :disabled t
-;;   :ensure t
-;;   :mode ("\\.pdf\\'" . pdf-view-mode)
-;;   :bind (:map pdf-view-mode-map
-;;               ("j" . image-next-line)
-;;               ("k" . image-previous-line))
-;;   :delight)
+(use-package async
+  :doc "Simple library for asynchronous processing in Emacs")
 
 (use-package define-word
   :doc "Dictionary in Emacs."
@@ -432,48 +340,12 @@
   :bind ("C-c w" . define-word-at-point)
   :delight)
 
-;; (use-package exec-path-from-shell
-;;   :doc "MacOS does not start a shell at login. This makes sure
-;;           that the env variable of shell and GUI Emacs look the
-;;           same."
-;;   :ensure t
-;;   :if (eq system-type 'darwin)
-;;   :config
-;;   (when (memq window-system '(mac ns))
-;;     (exec-path-from-shell-initialize)
-;;     (exec-path-from-shell-copy-envs
-;;      '("PATH" "ANDROID_HOME" "LEIN_USERNAME" "LEIN_PASSPHRASE"
-;;        "LEIN_JVM_OPTS" "NPM_TOKEN" "LANGUAGE" "LANG" "LC_ALL"
-;;        "MOBY_ENV" "JAVA_8_HOME" "JAVA_7_HOME" "JAVA_HOME" "PS1"
-;;        "NVM_DIR" "GPG_TTY")))
-;;   :delight)
 
 (use-package diminish
   :doc "Hide minor modes from mode line"
   :ensure t
   :delight)
 
-;; (use-package toggle-test
-;;   :doc "Switch between src and test files."
-;;   :ensure t
-;;   :config
-;;   (add-to-list 'tgt-projects '((:root-dir "~/workspace/moby")
-;;                                (:src-dirs "src")
-;;                                (:test-dirs "test")
-;;                                (:test-suffixes "_test")))
-;;   :bind ("C-c t" . tgt-toggle)
-;;   :delight)
-
-;; (use-package darkroom
-;;   :doc "Focused editing."
-;;   :ensure t
-;;   :disabled
-;;   :commands (darkroom-mode
-;;              darkroom-tentative-mode)
-;;   :config
-;;   (setq darkroom-text-scale-increase 1.5)
-;;   :bind ("C-c d" darkroom-mode)
-;;   :delight)
 
 (use-package flyspell
   :config

@@ -524,6 +524,10 @@
          ("C-#" . paxedit-symbol-kill))
   :delight)
 
+(use-package rainbow-identifiers
+  :ensure t
+  :init (add-hook 'prog-mode-hook 'rainbow-identifiers-mode))
+
 
 (use-package rainbow-delimiters
   :doc "Colorful paranthesis matching"

@@ -122,6 +122,17 @@
 
 
 ;; ──────────────────────── Added functionality (Generic usecases) ────────────────────────
+
+;; Set a directory for temporary/state related files.
+(defvar dotfiles-dirname
+  (file-name-directory (or load-file-name
+                           (buffer-file-name)))
+  "The directory where this code is running from. Ideally, this will be ~/.emacs.d.")
+
+
+(load (concat dotfiles-dirname "defuns.el"))
+
+
 (defun toggle-comment-on-line ()
   "Comment or uncomment current line."
   (interactive)
@@ -306,58 +317,58 @@
   (ivy-rich-mode 1)
   :delight)
 
-(use-package ivy-posframe
-  :doc "Custom positions for ivy buffers."
-  :ensure t
-  :config
-  (setq ivy-posframe-parameters
-        '((font . "Fira Code Retina")))
+;; (use-package ivy-posframe
+;;   :doc "Custom positions for ivy buffers."
+;;   :ensure t
+;;   :config
+;;   (setq ivy-posframe-parameters
+;;         '((font . "Fira Code Retina")))
 
-  (setq ivy-posframe-display-functions-alist
-        '((complete-symbol . ivy-posframe-display-at-point)
-          (swiper . nil)
-          (swiper-isearch . nil)
-          (counsel-rg . nil)
-          (t . ivy-posframe-display-at-frame-center)))
+;;   (setq ivy-posframe-display-functions-alist
+;;         '((complete-symbol . ivy-posframe-display-at-point)
+;;           (swiper . nil)
+;;           (swiper-isearch . nil)
+;;           (counsel-rg . nil)
+;;           (t . ivy-posframe-display-at-frame-center)))
 
-  (ivy-posframe-mode 1)
+;;   (ivy-posframe-mode 1)
 
-  ;; Due to a bug in macOS, changing ivy-posframe-border background color does not
-  ;; work. Instead, go to the elisp file and change the background color to black.
+;;   ;; Due to a bug in macOS, changing ivy-posframe-border background color does not
+;;   ;; work. Instead, go to the elisp file and change the background color to black.
 
-  :delight)
+;;   :delight)
 
-(use-package swiper
-  :doc "A better search"
-  :ensure t
-  :bind (("C-s" . swiper-isearch)
-         ("H-s" . isearch-forward-regexp))
-  :delight)
+;; (use-package swiper
+;;   :doc "A better search"
+;;   :ensure t
+;;   :bind (("C-s" . swiper-isearch)
+;;          ("H-s" . isearch-forward-regexp))
+;;   :delight)
 
-(use-package counsel
-  :doc "Ivy enhanced Emacs commands"
-  :ensure t
-  :bind (("M-x" . counsel-M-x)
-         ("C-x C-f" . counsel-find-file)
-         ("C-'" . counsel-imenu)
-         ("C-c s" . counsel-rg)
-         :map counsel-find-file-map
-         ("RET" . ivy-alt-done))
-  :delight)
+;; (use-package counsel
+;;   :doc "Ivy enhanced Emacs commands"
+;;   :ensure t
+;;   :bind (("M-x" . counsel-M-x)
+;;          ("C-x C-f" . counsel-find-file)
+;;          ("C-'" . counsel-imenu)
+;;          ("C-c s" . counsel-rg)
+;;          :map counsel-find-file-map
+;;          ("RET" . ivy-alt-done))
+;;   :delight)
 
-(use-package aggressive-indent
-  :doc "Intended Indentation"
-  :ensure t
-  :config
-  (add-hook 'before-save-hook 'aggressive-indent-indent-defun)
-  ;; Have a way to save without indentation.
-  ;; (defun save-without-aggresive-indentation ()
-  ;;   (interactive)
-  ;;   (remove-hook 'before-save-hook 'aggressive-indent-indent-defun)
-  ;;   (save-buffer)
-  ;;   (add-hook 'before-save-hook 'aggressive-indent-indent-defun))
-  ;; :bind (("C-x s" . save-without-aggresive-indentation))
-  :delight)
+;; (use-package aggressive-indent
+;;   :doc "Intended Indentation"
+;;   :ensure t
+;;   :config
+;;   (add-hook 'before-save-hook 'aggressive-indent-indent-defun)
+;;   ;; Have a way to save without indentation.
+;;   ;; (defun save-without-aggresive-indentation ()
+;;   ;;   (interactive)
+;;   ;;   (remove-hook 'before-save-hook 'aggressive-indent-indent-defun)
+;;   ;;   (save-buffer)
+;;   ;;   (add-hook 'before-save-hook 'aggressive-indent-indent-defun))
+;;   ;; :bind (("C-x s" . save-without-aggresive-indentation))
+;;   :delight)
 
 (use-package git-gutter
   :doc "Shows modified lines"
@@ -399,21 +410,21 @@
         ("C-c l" . mc/edit-lines))
   :delight)
 
-(use-package esup
-  :doc "Emacs Start Up Profiler (esup) benchmarks Emacs
-        startup time without leaving Emacs."
-  :ensure t
-  :delight)
+;; (use-package esup
+;;   :doc "Emacs Start Up Profiler (esup) benchmarks Emacs
+;;         startup time without leaving Emacs."
+;;   :ensure t
+;;   :delight)
 
-(use-package pdf-tools
-  :doc "Better pdf viewing"
-  :disabled t
-  :ensure t
-  :mode ("\\.pdf\\'" . pdf-view-mode)
-  :bind (:map pdf-view-mode-map
-              ("j" . image-next-line)
-              ("k" . image-previous-line))
-  :delight)
+;; (use-package pdf-tools
+;;   :doc "Better pdf viewing"
+;;   :disabled t
+;;   :ensure t
+;;   :mode ("\\.pdf\\'" . pdf-view-mode)
+;;   :bind (:map pdf-view-mode-map
+;;               ("j" . image-next-line)
+;;               ("k" . image-previous-line))
+;;   :delight)
 
 (use-package define-word
   :doc "Dictionary in Emacs."
@@ -442,27 +453,27 @@
   :ensure t
   :delight)
 
-(use-package toggle-test
-  :doc "Switch between src and test files."
-  :ensure t
-  :config
-  (add-to-list 'tgt-projects '((:root-dir "~/workspace/moby")
-                               (:src-dirs "src")
-                               (:test-dirs "test")
-                               (:test-suffixes "_test")))
-  :bind ("C-c t" . tgt-toggle)
-  :delight)
+;; (use-package toggle-test
+;;   :doc "Switch between src and test files."
+;;   :ensure t
+;;   :config
+;;   (add-to-list 'tgt-projects '((:root-dir "~/workspace/moby")
+;;                                (:src-dirs "src")
+;;                                (:test-dirs "test")
+;;                                (:test-suffixes "_test")))
+;;   :bind ("C-c t" . tgt-toggle)
+;;   :delight)
 
-(use-package darkroom
-  :doc "Focused editing."
-  :ensure t
-  :disabled
-  :commands (darkroom-mode
-             darkroom-tentative-mode)
-  :config
-  (setq darkroom-text-scale-increase 1.5)
-  :bind ("C-c d" darkroom-mode)
-  :delight)
+;; (use-package darkroom
+;;   :doc "Focused editing."
+;;   :ensure t
+;;   :disabled
+;;   :commands (darkroom-mode
+;;              darkroom-tentative-mode)
+;;   :config
+;;   (setq darkroom-text-scale-increase 1.5)
+;;   :bind ("C-c d" darkroom-mode)
+;;   :delight)
 
 (use-package flyspell
   :config

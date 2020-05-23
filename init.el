@@ -58,22 +58,25 @@
   (setq mac-command-modifier 'meta)
   (setq mac-right-command-modifier 'hyper))
 
-;; `C-x o' is a 2 step key binding. `M-o' is much easier.
-(global-set-key (kbd "M-o") 'other-window)
 
 ;; Unbind `save-buffers-kill-terminal` to avoid accidentally quiting Emacs.
 ;; (global-unset-key (kbd "C-x C-c"))
 
 ;; Delete whitespace just when a file is saved.
 (add-hook 'before-save-hook 'delete-trailing-whitespace)
+(add-hook 'before-save-hook 'whitespace-cleanup)
 
-;; Enable narrowing commands.
-(put 'narrow-to-region 'disabled nil)
-(put 'narrow-to-page 'disabled nil)
+;; Ask before quitting
+(global-set-key
+ (kbd "C-x C-c")
+ (lambda ()
+   (interactive)
+   (if (y-or-n-p "Quit Emacs? ")
+       (save-buffers-kill-emacs))))
 
-(global-set-key (kbd "H-d") 'narrow-to-defun)
-(global-set-key (kbd "H-t") 'narrow-to-defun)
-(global-set-key (kbd "H-w") 'widen)
+
+;; Allow delete selection
+(pending-delete-mode 1)
 
 ;; Display column number in mode line.
 (column-number-mode t)
@@ -288,12 +291,12 @@
          ("C-x C-f" . helm-find-files)
          ("M-s M-s" . helm-occur))
   :bind (:map helm-map
-	      ("M-i" . helm-previous-line)
-	      ("M-k" . helm-next-line)
-	      ("M-I" . helm-previous-page)
-	      ("M-K" . helm-next-page)
-	      ("M-h" . helm-beginning-of-buffer)
-	      ("M-H" . helm-end-of-buffer))
+              ("M-i" . helm-previous-line)
+              ("M-k" . helm-next-line)
+              ("M-I" . helm-previous-page)
+              ("M-K" . helm-next-page)
+              ("M-h" . helm-beginning-of-buffer)
+              ("M-H" . helm-end-of-buffer))
   :config (progn
             (setq helm-buffers-fuzzy-matching t
                   helm-recentf-fuzzy-match t
@@ -830,53 +833,14 @@
 
 (use-package "faces"
   :config
-  (set-face-attribute 'default nil :height 140)
+  (set-face-attribute 'default nil :height 190)
 
   ;; Use the 'Fira Code' if available
   (when (not (eq system-type 'windows-nt))
-    (when (member "Fira Code" (font-family-list))
+    (when (member "Fantasque Sans Mono" (font-family-list))
+      (set-frame-font "Fantasque Sans Mono"))))
 
-      ;; Fira code legatures
-      (let ((alist '((33 . ".\\(?:\\(?:==\\|!!\\)\\|[!=]\\)")
-                     (35 . ".\\(?:###\\|##\\|_(\\|[#(?[_{]\\)")
-                     (36 . ".\\(?:>\\)")
-                     (37 . ".\\(?:\\(?:%%\\)\\|%\\)")
-                     (38 . ".\\(?:\\(?:&&\\)\\|&\\)")
-                     ;; (42 . ".\\(?:\\(?:\\*\\*/\\)\\|\\(?:\\*[*/]\\)\\|[*/>]\\)")
-                     (43 . ".\\(?:\\(?:\\+\\+\\)\\|[+>]\\)")
-                     ;; Causes "error in process filter: Attempt to shape unibyte text".
-                     (45 . ".\\(?:\\(?:-[>-]\\|<<\\|>>\\)\\|[<>}~-]\\)")
-                     ;; Fira code page said that this causes an error in Mojave.
-                     ;; (46 . ".\\(?:\\(?:\\.[.<]\\)\\|[.=-]\\)")
-                     (47 . ".\\(?:\\(?:\\*\\*\\|//\\|==\\)\\|[*/=>]\\)")
-                     (48 . ".\\(?:x[a-zA-Z]\\)")
-                     ;; Grouping ';' and ':' in groups of 3 causes occur to break. Disable it.
-                     ;; (58 . ".\\(?:::\\|[:=]\\)")
-                     ;; (59 . ".\\(?:;;\\|;\\)")
-                     (60 . ".\\(?:\\(?:!--\\)\\|\\(?:~~\\|->\\|\\$>\\|\\*>\\|\\+>\\|--\\|<[<=-]\\|=[<=>]\\||>\\)\\|[*$+~/<=>|-]\\)")
-                     ;; (61 . ".\\(?:\\(?:/=\\|:=\\|<<\\|=[=>]\\|>>\\)\\|[<=>~]\\)")
-                     (62 . ".\\(?:\\(?:=>\\|>[=>-]\\)\\|[=>-]\\)")
-                     (63 . ".\\(?:\\(\\?\\?\\)\\|[:=?]\\)")
-                     (91 . ".\\(?:]\\)")
-                     (92 . ".\\(?:\\(?:\\\\\\\\\\)\\|\\\\\\)")
-                     (94 . ".\\(?:=\\)")
-                     (119 . ".\\(?:ww\\)")
-                     (123 . ".\\(?:-\\)")
-                     (124 . ".\\(?:\\(?:|[=|]\\)\\|[=>|]\\)")
-                     (126 . ".\\(?:~>\\|~~\\|[>=@~-]\\)"))))
-        (dolist (char-regexp alist)
-          (set-char-table-range composition-function-table (car char-regexp)
-                                `([,(cdr char-regexp) 0 font-shape-gstring]))))
 
-      (set-frame-font "Fira Code Retina"))))
-
-(use-package emojify
-  :doc "Display Emoji in Emacs."
-  :ensure t
-  :disabled t
-  :init
-  (add-hook 'after-init-hook #'global-emojify-mode)
-  :delight)
 
 
 ;; ──────────────────────────────────────── *ORG* ───────────────────────────────────────

@@ -275,5 +275,20 @@ them. These include the path relative to the project root."
   (kill-ring-save beg end))
 
 
+(defun change-font-size (n)
+  "Change the font size (as N)."
+  (interactive "nFont size: ")
+  ;; (set-default-font "Ubuntu Mono")
+  ;; (set-default-font "JetBrains Mono")
+  (set-frame-font "Fantasque Sans Mono")
+  (setq-default line-spacing 4)
+  (set-face-attribute 'default nil :height (string-to-number n))
+
+  ;; Use the 'Fira Code' if available
+  (when (not (eq system-type 'windows-nt))
+    (when (member "Fantasque Sans Mono" (font-family-list))
+      (set-frame-font "Fantasque Sans Mono"))))
+
+
 (provide 'defuns)
 ;;; defuns.el ends here

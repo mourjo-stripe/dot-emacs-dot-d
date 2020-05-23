@@ -262,6 +262,40 @@
   (which-key-mode t)
   :delight)
 
+(use-package helm
+  :ensure t
+  :bind (("C-x c r" . nil)
+         ("C-x c r b" . helm-filtered-bookmarks)
+         ("C-x c r r" . helm-regexp)
+         ("C-x b" . helm-buffers-list)
+         ("M-y" . helm-show-kill-ring)
+         ("C-x c SPC" . helm-all-mark-rings)
+         ("C-h SPC" . helm-all-mark-rings)
+         ("C-x c r i" . helm-register)
+         ("M-i" . helm-imenu)
+         ("M-x" . helm-M-x)
+         ("C-x C-f" . helm-find-files)
+         ("M-s M-s" . helm-occur))
+  :bind (:map helm-map
+	      ("M-i" . helm-previous-line)
+	      ("M-k" . helm-next-line)
+	      ("M-I" . helm-previous-page)
+	      ("M-K" . helm-next-page)
+	      ("M-h" . helm-beginning-of-buffer)
+	      ("M-H" . helm-end-of-buffer))
+  :config (progn
+            (setq helm-buffers-fuzzy-matching t
+                  helm-recentf-fuzzy-match t
+                  helm-apropos-fuzzy-match t
+                  helm-M-x-fuzzy-match t
+                  helm-imenu-fuzzy-match t
+                  helm-mode-fuzzy-match t
+                  helm-completion-in-region-fuzzy-match t
+                  helm-candidate-number-limit 100
+                  helm-split-window-default-side 'below
+                  helm-full-frame nil)
+            (helm-mode 1)))
+
 (use-package ivy
   :doc "A generic completion mechanism"
   :ensure t

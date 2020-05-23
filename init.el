@@ -378,6 +378,11 @@
 (use-package git-gutter
   :doc "Shows modified lines"
   :ensure t
+  :bind (("C-x q" . git-gutter:revert-hunk)
+         ("C-c C-s" . git-gutter:stage-hunk)
+         ("C-x p" . git-gutter:previous-hunk)
+         ("C-x n" . git-gutter:next-hunk)
+         ("C-x C-p" . git-gutter:popup-hunk))
   :config
   (setq git-gutter:modified-sign "|")
   (setq git-gutter:added-sign "|")

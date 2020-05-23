@@ -262,6 +262,18 @@
   (which-key-mode t)
   :delight)
 
+
+(use-package exec-path-from-shell
+  :doc "MacOS does not start a shell at login. This makes sure
+          that the env variable of shell and GUI Emacs look the
+          same."
+  :ensure t
+  :if (eq system-type 'darwin)
+  :config
+  (when (memq window-system '(mac ns))
+    (exec-path-from-shell-initialize))
+  :delight)
+
 (use-package helm
   :ensure t
   :bind (("C-x c r" . nil)
@@ -294,7 +306,45 @@
                   helm-candidate-number-limit 100
                   helm-split-window-default-side 'below
                   helm-full-frame nil)
-            (helm-mode 1)))
+            (helm-mode 1))
+  :delight)
+
+
+(use-package helm-descbinds
+  :ensure t
+  :bind ("C-h b" . helm-descbinds)
+  :config (progn (helm-descbinds-mode))
+  :delight)
+
+
+(use-package helm-ag
+  :ensure t
+  :bind (("C-x c g a" . helm-do-ag-project-root)
+         ("C-x c g s" . helm-do-ag)
+         ("C-x c g g" . helm-do-grep-ag))
+  :config (progn (setq helm-ag-insert-at-point 'symbol
+                       helm-ag-fuzzy-match t
+                       helm-truncate-lines t
+                       helm-ag-use-agignore t))
+  :delight)
+
+
+(use-package helm-projectile
+  :ensure t
+  :bind (("C-c p" . projectile-command-map))
+  :config (progn (require 'helm-projectile)
+                 (projectile-mode)
+                 (setq projectile-completion-system 'helm
+                       projectile-switch-project-action 'helm-projectile
+                       projectile-enable-caching t
+                       projectile-mode-line '(:eval (if (file-remote-p default-directory)
+                                                        " "
+                                                      (format " Ptl[%s]"
+                                                              (projectile-project-name)))))
+                 (helm-projectile-on))
+  :delight)
+
+
 
 (use-package ivy
   :doc "A generic completion mechanism"
@@ -659,7 +709,7 @@
 
 ;; ──────────────────────────────────── Custom config ───────────────────────────────────
 
-
+(setq ring-bell-function 'ignore)
 (global-set-key (kbd "C-a") 'back-to-indentation-or-beginning-of-line)
 (global-set-key (kbd "C-7") 'comment-or-uncomment-current-line-or-region)
 (global-set-key (kbd "C-6") 'linum-mode)

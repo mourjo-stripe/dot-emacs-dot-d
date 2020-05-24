@@ -685,36 +685,8 @@
   :delight)
 
 (use-package clj-refactor
-  :disabled t
   :ensure t
   :preface
-  (defun clean-all-modified-ns ()
-    "Cleans all the modified namespaces. The idea is to use this
-    before commiting, so that all the namespaces that you modify are
-    cleaned! :)"
-    (interactive)
-    (let ((extension ".clj")
-          ;; `shell-command-to-string` contains a "\n" at its end. `butlast` is used to
-          ;; get rid of the last empty string returned by `split-string`.
-          (modified-files
-           (butlast
-            (split-string
-             (shell-command-to-string
-              "git diff --name-only && git diff --name-only --staged")
-             "\n"))))
-      (if (= (length modified-files) 0)
-          (message "No files have changed.")
-        (progn
-          (dolist (file modified-files)
-            (when (string-equal (substring file (- (length file) (length extension)))
-                                extension)
-              (when (not (string-equal (first (last (split-string file "/")))
-                                       "project.clj"))
-                (with-current-buffer (find-file-noselect (concat (cljr--project-dir) file))
-                  (cljr--clean-ns)
-                  (save-buffer)))))
-          (message "Namespaces cleaned! :)")))))
-
   (defun my-clojure-mode-hook ()
     (clj-refactor-mode 1)
     (yas-minor-mode 1) ;; for adding require/use/import statements

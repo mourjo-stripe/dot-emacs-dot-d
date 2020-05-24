@@ -283,13 +283,16 @@
   :bind (("C-x c r" . nil)
          ("C-x c r b" . helm-filtered-bookmarks)
          ("C-x c r r" . helm-regexp)
-         ("C-x b" . helm-buffers-list)
+         ;; Helm resume does not allow ignoring some helm commands
+         ;; ("C-x b" . helm-buffers-list)
          ("M-y" . helm-show-kill-ring)
          ("C-x c SPC" . helm-all-mark-rings)
          ("C-h SPC" . helm-all-mark-rings)
          ("C-x c r i" . helm-register)
          ("M-i" . helm-imenu)
-         ("M-x" . helm-M-x)
+         ;; Helm resume does not allow ignoring some helm commands
+         ;; ("M-x" . helm-M-x)
+         ("C-x c b" . helm-resume)
          ("C-x C-f" . helm-find-files)
          ("M-s M-s" . helm-occur))
   :bind (:map helm-map
@@ -348,6 +351,18 @@
   :delight)
 
 
+(use-package counsel
+  :doc "Ivy enhanced Emacs commands"
+  :ensure t
+  :bind (("M-x" . counsel-M-x)
+         ("C-x C-f" . counsel-find-file)
+         ("C-'" . counsel-imenu)
+         ("C-c s" . counsel-rg)
+         :map counsel-find-file-map
+         ("RET" . ivy-alt-done))
+  :delight)
+
+
 
 (use-package ivy
   :doc "A generic completion mechanism"
@@ -386,15 +401,13 @@
          ("C-x p" . git-gutter:previous-hunk)
          ("C-x n" . git-gutter:next-hunk)
          ("C-x C-p" . git-gutter:popup-hunk))
-  :config
-  (setq git-gutter:modified-sign "|")
-  (setq git-gutter:added-sign "|")
-  (setq git-gutter:deleted-sign "|")
-  (set-face-foreground 'git-gutter:modified "grey")
-  (set-face-foreground 'git-gutter:added "green")
-  (set-face-foreground 'git-gutter:deleted "red")
-  (global-git-gutter-mode t)
   :delight)
+
+
+(use-package git-gutter-fringe
+  :ensure t
+  :config (global-git-gutter-mode +1))
+
 
 (use-package git-timemachine
   :doc "Go through git history in a file"
@@ -473,7 +486,7 @@
          ("C-n" . company-select-next)
          ("C-p" . company-select-previous))
   :config
-  (setq company-idle-delay 0.1)
+  (setq company-idle-delay 0)
   (global-company-mode t)
 
   ;; Configure hippie expand as well.
@@ -594,8 +607,33 @@
   ;; Go right to the REPL buffer when it's finished connecting
   (setq cider-repl-pop-to-buffer-on-connect t)
 
+
+  (setq cider-repl-history-size most-positive-fixnum
+        nrepl-hide-special-buffers t
+        cider-auto-jump-to-error nil
+        cider-use-fringe-indicators nil
+        cider-stacktrace-default-filters '(tooling dup)
+        cider-stacktrace-fill-column 80
+        cider-test-show-report-on-success t
+        cider-font-lock-dynamically nil
+        cider-prefer-local-resources t
+        cider-repl-display-in-current-window nil
+        cider-eval-result-prefix ";; => "
+        cider-use-overlays t
+        cider-prompt-save-file-on-load t
+        cider-repl-prompt-function 'cider-repl-prompt-on-newline
+        nrepl-buffer-name-separator "-"
+        nrepl-buffer-name-show-port t
+        cider-annotate-completion-candidates t
+        cider-completion-annotations-include-ns 'always
+        cider-show-error-buffer 'always
+        cider-apropos-actions
+        '(("find-def" . cider--find-var)
+          ("display-doc" . cider-doc-lookup)
+          ("lookup-on-grimoire" . cider-grimoire-lookup)))
+
+
   ;; When there's a cider error, show its buffer and switch to it
-  (setq cider-show-error-buffer t)
   (setq cider-auto-select-error-buffer t)
 
   ;; Where to store the cider history.
@@ -612,13 +650,6 @@
 
   ;; Log client-server messaging in *nrepl-messages* buffer
   (setq nrepl-log-messages nil)
-
-  ;; ;; REPL should expect input on the next line + unnecessary palm trees!
-  ;; (defun cider-repl-prompt-custom (namespace)
-  ;;   "Return a prompt string that mentions NAMESPACE."
-  ;;   (format "🌴 %s 🌴 \n" namespace))
-
-  ;; (setq cider-repl-prompt-function 'cider-repl-prompt-custom)
 
   :bind (:map
          cider-mode-map

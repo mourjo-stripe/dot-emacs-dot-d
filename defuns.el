@@ -295,6 +295,12 @@ them. These include the path relative to the project root."
   (interactive)
   (find-file user-init-file))
 
+(defun cider-repl-prompt-on-newline (ns)
+  "Return a prompt string with newline.
+NS is the namespace information passed into the function by
+cider."
+  (concat ns ">\n"))
+
 
 (provide 'defuns)
 ;;; defuns.el ends here

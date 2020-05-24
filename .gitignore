@@ -5,3 +5,5 @@ cider-history
 elpa/
 projectile-bookmarks.eld
 transient/
+places
+projectile.cache

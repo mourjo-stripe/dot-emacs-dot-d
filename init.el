@@ -404,11 +404,6 @@
   :delight)
 
 
-(use-package git-gutter-fringe
-  :ensure t
-  :config (global-git-gutter-mode +1))
-
-
 (use-package git-timemachine
   :doc "Go through git history in a file"
   :ensure t
@@ -476,8 +471,13 @@
 (use-package company
   :doc "COMplete ANYthing"
   :ensure t
+  :init (progn
+          (add-hook 'after-init-hook 'global-company-mode)
+          (setq-default company-lighter " cmp")
+          (setq company-idle-delay 0)
+          (global-company-mode t))
   :bind (:map
-         global-map
+         company-active-map
          ("TAB" . company-complete-common-or-cycle)
          ;; Use hippie expand as secondary auto complete. It is useful as it is
          ;; 'buffer-content' aware (it uses all buffers for that).
@@ -486,8 +486,7 @@
          ("C-n" . company-select-next)
          ("C-p" . company-select-previous))
   :config
-  (setq company-idle-delay 0)
-  (global-company-mode t)
+
 
   ;; Configure hippie expand as well.
   (setq hippie-expand-try-functions-list

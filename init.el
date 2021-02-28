@@ -320,7 +320,7 @@
          ("C-x c r i" . helm-register)
          ("M-i" . helm-imenu)
          ;; Helm resume does not allow ignoring some helm commands
-         ;; ("M-x" . helm-M-x)
+         ("M-x" . helm-M-x)
          ("C-x c b" . helm-resume)
          ;; ("C-x C-f" . helm-find-files)
          ("M-s M-s" . helm-occur))
@@ -367,7 +367,7 @@
 (use-package counsel
   :doc "Ivy enhanced Emacs commands"
   :ensure t
-  :bind (("M-x" . counsel-M-x)
+  :bind (;; ("M-x" . counsel-M-x)
          ("C-x C-f" . counsel-find-file)
          ("C-'" . counsel-imenu)
          ("C-c s" . counsel-rg)
@@ -394,6 +394,7 @@
          ("C-x B" . ivy-switch-buffer-other-window))
   :delight)
 
+
 (use-package ivy-rich
   :doc "Have additional information in empty space of ivy buffers."
   :disabled t
@@ -406,48 +407,6 @@
   (ivy-rich-mode 1)
   :delight)
 
-(use-package ivy-posframe
-  :doc "Custom positions for ivy buffers."
-  :ensure t
-  :config
-
-  (when (member "Fira Code" (font-family-list))
-    (setq ivy-posframe-parameters
-          '((font . "Fira Code"))))
-
-  (setq ivy-posframe-border-width 5)
-
-  (setq ivy-posframe-display-functions-alist
-        '((complete-symbol . ivy-posframe-display-at-point)
-          ;; (swiper . ivy-display-function-fallback)
-          (swiper-isearch . ivy-display-function-fallback)
-          (counsel-rg . ivy-display-function-fallback)
-          (t . ivy-posframe-display-at-frame-center)))
-
-  (ivy-posframe-mode t)
-
-  ;; Due to a bug in macOS, changing ivy-posframe-border background color does not
-  ;; work. Instead, go to the elisp file and change the background color to black.
-
-  :delight)
-
-;; (use-package swiper
-;;   :doc "A better search"
-;;   :ensure t
-;;   :bind (("C-s" . swiper-isearch)
-;;          ("H-s" . isearch-forward-regexp))
-;;   :delight)
-
-(use-package counsel
-  :doc "Ivy enhanced Emacs commands"
-  :ensure t
-  :bind (("M-x" . counsel-M-x)
-         ("C-x C-f" . counsel-find-file)
-         ("C-'" . counsel-imenu)
-         ("C-c s" . counsel-rg)
-         :map counsel-find-file-map
-         ("RET" . ivy-alt-done))
-  :delight)
 
 (use-package aggressive-indent
   :doc "Intended Indentation"
@@ -555,16 +514,6 @@
   (set-face-attribute 'flyspell-duplicate nil :underline '(:style line :color "#bf616a"))
 
   :bind ("H-l" . flyspell-learn-word-at-point))
-
-(use-package company-emoji
-  :ensure t
-  :config
-  (add-to-list 'company-backends 'company-emoji)
-  (if (version< "27.0" emacs-version)
-      (set-fontset-font
-       "fontset-default" 'unicode "Apple Color Emoji" nil 'prepend)
-    (set-fontset-font t 'symbol (font-spec :family "Apple Color Emoji")
-                      nil 'prepend)))
 
 (use-package helm-projectile
   :ensure t
@@ -701,20 +650,6 @@
 (use-package yasnippet
   :ensure t
   :config (yas-global-mode))
-;; (use-package lsp-mode :ensure t)
-;; (use-package hydra :ensure t)
-;; (use-package lsp-ui :ensure t)
-;; (use-package lsp-java :ensure t
-;;   :config (add-hook 'java-mode-hook 'lsp))
-
-;; (use-package dap-mode
-;;   :ensure t :after lsp-mode
-;;   :config
-;;   (dap-mode t)
-;;   (dap-ui-mode t))
-
-;; (use-package dap-java :after (lsp-java))
-
 
 
 ;; ──────────────────────────────── Programming languages ───────────────────────────────
@@ -726,35 +661,7 @@
   ;; Java classes (e.g. JavaClassName)
   (add-hook 'clojure-mode-hook #'subword-mode)
 
-  ;; Show 'ƒ' instead of 'fn' in clojure mode
-  (defun prettify-fns ()
-    (font-lock-add-keywords
-     nil `(("(\\(fn\\)[\[[:space:]]"
-            (0 (progn (compose-region (match-beginning 1) (match-end 1)
-                                      "ƒ")
-                      nil))))))
-  (add-hook 'clojure-mode-hook 'prettify-fns)
-  (add-hook 'cider-repl-mode-hook 'prettify-fns)
 
-  ;; Show lambda instead of '#' in '#(...)'
-  (defun prettify-anonymous-fns ()
-    (font-lock-add-keywords
-     nil `(("\\(#\\)("
-            (0 (progn (compose-region (match-beginning 1) (match-end 1)
-                                      ,(make-char 'greek-iso8859-7 107))
-                      nil))))))
-  (add-hook 'clojure-mode-hook 'prettify-anonymous-fns)
-  (add-hook 'cider-repl-mode-hook 'prettify-anonymous-fns)
-
-  ;; Show '∈' instead of '#' in '#{}' (sets)
-  (defun prettify-sets ()
-    (font-lock-add-keywords
-     nil `(("\\(#\\){"
-            (0 (progn (compose-region (match-beginning 1) (match-end 1)
-                                      "∈")
-                      nil))))))
-  (add-hook 'clojure-mode-hook 'prettify-sets)
-  (add-hook 'cider-repl-mode-hook 'prettify-sets)
   :delight)
 
 (use-package clojure-mode-extra-font-locking
@@ -817,13 +724,6 @@
 
   ;; Log client-server messaging in *nrepl-messages* buffer
   (setq nrepl-log-messages nil)
-
-  ;; REPL should expect input on the next line + unnecessary palm trees!
-  (defun cider-repl-prompt-custom (namespace)
-    "Return a prompt string that mentions NAMESPACE."
-    (format "🌴 %s 🌴 \n" namespace))
-
-  (setq cider-repl-prompt-function 'cider-repl-prompt-custom)
 
   :bind (:map
          cider-mode-map
@@ -1032,12 +932,11 @@
       (set-face-attribute 'default nil :height 190)
     (set-face-attribute 'default nil :height 160))
 
-  ;; Use the 'Fira Code' if available
   (when (not (eq system-type 'windows-nt))
     (when (member "Fantasque Sans Mono" (font-family-list))
       (set-frame-font "Fantasque Sans Mono"))))
 
-(when window-system (set-frame-size (selected-frame) 165 80))
+(when window-system (set-frame-size (selected-frame) 173 80))
 
 
 (defun copy-reference ()

@@ -3,21 +3,12 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(org-agenda-custom-commands
-   '(("i" "My Agenda"
-      ((agenda ""
-               ((org-agenda-overriding-header "Agenda")
-                (org-agenda-span 3)))
-       (tags-todo "STYLE=\"habit\""
-                  ((org-agenda-files
-                    (list org-habits-file))
-                   (org-agenda-overriding-header "Habits"))))
-      nil nil)))
  '(package-selected-packages
-   '(markdown-mode org-super-agenda org-bullets powerline use-package)))
+   (quote
+    (company-emoji toggle-test aggressive-indent ivy-posframe which-key use-package rainbow-identifiers powerline paxedit nord-theme magit idle-highlight-mode highlight-symbol helm-projectile helm-descbinds helm-ag git-timemachine git-gutter flycheck-joker flycheck-clj-kondo expand-region exec-path-from-shell dumb-jump diminish delight define-word counsel company clojure-mode-extra-font-locking clj-refactor ace-jump-mode))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(ivy-posframe ((t (:background "black")))))
+ )

@@ -1,21 +1,3 @@
-;;; init.el --- My Emacs configuration.
-;;; Commentary:
-;;; Author: Suvrat Apte
-;;; Created on: 02 November 2015
-;;; Copyright (c) 2019 Suvrat Apte <suvratapte@gmail.com>
-
-;; This file is not part of GNU Emacs.
-
-;;; License:
-
-;; This program is free software; you can redistribute it and/or
-;; modify it under the terms of the Do What The Fuck You Want to
-;; Public License, Version 2, which is included with this distribution.
-;; See the file LICENSE.txt
-
-;;; Code:
-
-
 ;; ─────────────────────────────────── Set up 'package' ───────────────────────────────────
 (require 'package)
 
@@ -32,7 +14,8 @@
   (package-refresh-contents)
   (package-install 'use-package))
 
-
+
+
 ;; ───────────────────────────────── Use better defaults ────────────────────────────────
 (setq-default
  ;; Don't use the compiled code if its the older package.
@@ -48,9 +31,7 @@
  fill-column 80
 
  ;; Use your name in the frame title. :)
- frame-title-format (format "%s's Emacs" (if (equal user-login-name "suvratapte")
-                                             "Suvrat"
-                                           (capitalize user-login-name)))
+ frame-title-format (format "%s's Emacs" (capitalize user-login-name))
 
  ;; Do not create lockfiles.
  create-lockfiles nil
@@ -67,13 +48,7 @@
  auto-save-default nil
 
  ;; Allow commands to be run on minibuffers.
- enable-recursive-minibuffers t
-
- ;; Do not ring bell
- ring-bell-function 'ignore)
-
-;; Load `custom-file` manually as we have modified the default path.
-(load-file custom-file)
+ enable-recursive-minibuffers t)
 
 ;; Change all yes/no questions to y/n type
 (fset 'yes-or-no-p 'y-or-n-p)
@@ -81,30 +56,41 @@
 ;; Make the command key behave as 'meta'
 (when (eq system-type 'darwin)
   (setq mac-command-modifier 'meta)
-  (setq mac-right-command-modifier 'hyper))
+  (setq mac-right-command-modifier 'meta)
+  (setq delete-by-moving-to-trash t))
 
-;; `C-x o' is a 2 step key binding. `M-o' is much easier.
-(global-set-key (kbd "M-o") 'other-window)
+
+;; Make the alt key behave as 'meta' on linux
+(when (eq system-type 'gnu/linux)
+  (setq x-alt-keysym 'meta))
+
 
 ;; Unbind `save-buffers-kill-terminal` to avoid accidentally quiting Emacs.
-(global-unset-key (kbd "C-x C-c"))
+;; (global-unset-key (kbd "C-x C-c"))
 
 ;; Delete whitespace just when a file is saved.
 (add-hook 'before-save-hook 'delete-trailing-whitespace)
+(add-hook 'before-save-hook 'whitespace-cleanup)
 
-;; Enable narrowing commands.
-(put 'narrow-to-region 'disabled nil)
-(put 'narrow-to-page 'disabled nil)
+;; Ask before quitting
+(global-set-key
+ (kbd "C-x C-c")
+ (lambda ()
+   (interactive)
+   (if (y-or-n-p "Quit Emacs? ")
+       (save-buffers-kill-emacs))))
 
-(global-set-key (kbd "H-r") 'narrow-to-region)
-(global-set-key (kbd "H-d") 'narrow-to-defun)
-(global-set-key (kbd "H-w") 'widen)
-(global-set-key (kbd "H-c") 'calendar)
+
+;; Allow delete selection
+(pending-delete-mode 1)
+
+;; Display column number in mode line.
+(column-number-mode t)
 
 ;; Automatically update buffers if file content on the disk has changed.
 (global-auto-revert-mode t)
 
-
+
 ;; ─────────────────────────── Disable unnecessary UI elements ──────────────────────────
 (progn
 
@@ -116,10 +102,10 @@
   (when (fboundp 'scroll-bar-mode)
     (scroll-bar-mode -1))
 
-  ;; Highlight line on point.
-  (global-hl-line-mode t))
+  (when (fboundp 'menu-bar-mode)
+    (menu-bar-mode -1)))
 
-
+
 ;; ───────────────────────── Better interaction with X clipboard ────────────────────────
 (setq-default
  ;; Makes killing/yanking interact with the clipboard.
@@ -142,8 +128,19 @@
  ;; Mouse yank commands yank at point instead of at click.
  mouse-yank-at-point t)
 
-
+
 ;; ──────────────────────── Added functionality (Generic usecases) ────────────────────────
+
+;; Set a directory for temporary/state related files.
+(defvar dotfiles-dirname
+  (file-name-directory (or load-file-name
+                           (buffer-file-name)))
+  "The directory where this code is running from. Ideally, this will be ~/.emacs.d.")
+
+
+(load (concat dotfiles-dirname "defuns.el"))
+
+
 (defun toggle-comment-on-line ()
   "Comment or uncomment current line."
   (interactive)
@@ -185,6 +182,7 @@
 
 (global-set-key (kbd "C-c ;") 'comment-pretty)
 
+
 ;; Thanks to Narendra Joshi.
 (defun upload-region (beg end)
   "Upload the contents of the selected region in current buffer.
@@ -225,7 +223,6 @@
     "An identity handler for :doc.
      Currently, the value for this keyword is being ignored.
      This is done just to pass the compilation when :doc is included
-
      Argument NAME-SYMBOL is the first argument to `use-package' in a declaration.
      Argument KEYWORD here is simply :doc.
      Argument DOCSTRING is the value supplied for :doc keyword.
@@ -252,6 +249,7 @@
   :config
   (setq recentf-auto-cleanup 'never
         recentf-max-saved-items 1000
+        recentf-max-menu-items 1000
         recentf-save-file (concat user-emacs-directory ".recentf"))
   (recentf-mode t)
   :delight)
@@ -273,13 +271,15 @@
 (use-package magit
   :doc "Git integration for Emacs"
   :ensure t
+  :config (add-hook 'magit-mode-hook
+                    (lambda () (hl-line-mode -1)))
   :bind ("C-x g" . magit-status)
   :delight)
 
 (use-package ace-jump-mode
   :doc "Jump around the visible buffer using 'Head Chars'"
   :ensure t
-  :bind ("C-." . ace-jump-mode)
+  ;; :bind ("C-." . ace-jump-mode)
   :delight)
 
 (use-package dumb-jump
@@ -294,6 +294,88 @@
   :config
   (which-key-mode t)
   :delight)
+
+
+(use-package exec-path-from-shell
+  :doc "MacOS does not start a shell at login. This makes sure
+          that the env variable of shell and GUI Emacs look the
+          same."
+  :ensure t
+  :if (eq system-type 'darwin)
+  :config
+  (when (memq window-system '(mac ns))
+    (exec-path-from-shell-initialize))
+  :delight)
+
+(use-package helm
+  :ensure t
+  :bind (("C-x c r" . nil)
+         ("C-x c r b" . helm-filtered-bookmarks)
+         ("C-x c r r" . helm-regexp)
+         ;; Helm resume does not allow ignoring some helm commands
+         ("C-x b" . helm-buffers-list)
+         ("M-y" . helm-show-kill-ring)
+         ("C-x c SPC" . helm-all-mark-rings)
+         ("C-h SPC" . helm-all-mark-rings)
+         ("C-x c r i" . helm-register)
+         ("M-i" . helm-imenu)
+         ;; Helm resume does not allow ignoring some helm commands
+         ;; ("M-x" . helm-M-x)
+         ("C-x c b" . helm-resume)
+         ;; ("C-x C-f" . helm-find-files)
+         ("M-s M-s" . helm-occur))
+  :bind (:map helm-map
+              ("M-i" . helm-previous-line)
+              ("M-k" . helm-next-line)
+              ("M-I" . helm-previous-page)
+              ("M-K" . helm-next-page)
+              ("M-h" . helm-beginning-of-buffer)
+              ("M-H" . helm-end-of-buffer))
+  :init (setq helm-buffers-fuzzy-matching t
+              helm-recentf-fuzzy-match t
+              helm-apropos-fuzzy-match t
+              helm-M-x-fuzzy-match t
+              helm-imenu-fuzzy-match t
+              helm-mode-fuzzy-match t
+              helm-completion-in-region-fuzzy-match t
+              helm-candidate-number-limit 100
+              helm-split-window-default-side 'below
+              helm-full-frame nil)
+  :config (progn (helm-mode 1))
+  :delight)
+
+
+(use-package helm-descbinds
+  :ensure t
+  :bind ("C-h b" . helm-descbinds)
+  :config (progn (helm-descbinds-mode))
+  :delight)
+
+
+(use-package helm-ag
+  :ensure t
+  :bind (("C-x c g a" . helm-do-ag-project-root)
+         ("C-x c g s" . helm-do-ag)
+         ("C-x c g g" . helm-do-grep-ag))
+  :config (progn (setq helm-ag-insert-at-point 'symbol
+                       helm-ag-fuzzy-match t
+                       helm-truncate-lines t
+                       helm-ag-use-agignore t))
+  :delight)
+
+
+(use-package counsel
+  :doc "Ivy enhanced Emacs commands"
+  :ensure t
+  :bind (("M-x" . counsel-M-x)
+         ("C-x C-f" . counsel-find-file)
+         ("C-'" . counsel-imenu)
+         ("C-c s" . counsel-rg)
+         :map counsel-find-file-map
+         ("RET" . ivy-alt-done))
+  :delight)
+
+
 
 (use-package ivy
   :doc "A generic completion mechanism"
@@ -337,7 +419,7 @@
 
   (setq ivy-posframe-display-functions-alist
         '((complete-symbol . ivy-posframe-display-at-point)
-          (swiper . ivy-display-function-fallback)
+          ;; (swiper . ivy-display-function-fallback)
           (swiper-isearch . ivy-display-function-fallback)
           (counsel-rg . ivy-display-function-fallback)
           (t . ivy-posframe-display-at-frame-center)))
@@ -349,12 +431,12 @@
 
   :delight)
 
-(use-package swiper
-  :doc "A better search"
-  :ensure t
-  :bind (("C-s" . swiper-isearch)
-         ("H-s" . isearch-forward-regexp))
-  :delight)
+;; (use-package swiper
+;;   :doc "A better search"
+;;   :ensure t
+;;   :bind (("C-s" . swiper-isearch)
+;;          ("H-s" . isearch-forward-regexp))
+;;   :delight)
 
 (use-package counsel
   :doc "Ivy enhanced Emacs commands"
@@ -384,24 +466,19 @@
 (use-package git-gutter
   :doc "Shows modified lines"
   :ensure t
-  :config
-  (setq git-gutter:modified-sign "|")
-  (setq git-gutter:added-sign "|")
-  (setq git-gutter:deleted-sign "|")
-  (global-git-gutter-mode t)
+  :bind (("C-x q" . git-gutter:revert-hunk)
+         ("C-c C-s" . git-gutter:stage-hunk)
+         ("C-x p" . git-gutter:previous-hunk)
+         ("C-x n" . git-gutter:next-hunk)
+         ("C-x C-p" . git-gutter:popup-hunk))
   :delight)
+
 
 (use-package git-timemachine
   :doc "Go through git history in a file"
   :ensure t
   :delight)
 
-(use-package region-bindings-mode
-  :doc "Define bindings only when a region is selected."
-  :ensure t
-  :config
-  (region-bindings-mode-enable)
-  :delight)
 
 (use-package multiple-cursors
   :doc "A minor mode for editing with multiple cursors"
@@ -410,29 +487,16 @@
   (setq mc/always-run-for-all t)
   :bind
   ;; Use multiple cursor bindings only when a region is active
-  (:map region-bindings-mode-map
-        ("C->" . mc/mark-next-like-this)
-        ("C-<" . mc/mark-previous-like-this)
-        ("C-c a" . mc/mark-all-like-this)
-        ("C-c h" . mc-hide-unmatched-lines-mode)
-        ("C-c l" . mc/edit-lines))
+  (("C->" . mc/mark-next-like-this)
+   ("C-<" . mc/mark-previous-like-this))
   :delight)
 
-(use-package esup
-  :doc "Emacs Start Up Profiler (esup) benchmarks Emacs
-        startup time without leaving Emacs."
+(use-package expand-region
   :ensure t
-  :delight)
+  :bind ("C-=" . er/expand-region))
 
-(use-package pdf-tools
-  :doc "Better pdf viewing"
-  :disabled t
-  :ensure t
-  :mode ("\\.pdf\\'" . pdf-view-mode)
-  :bind (:map pdf-view-mode-map
-              ("j" . image-next-line)
-              ("k" . image-previous-line))
-  :delight)
+(use-package async
+  :doc "Simple library for asynchronous processing in Emacs")
 
 (use-package define-word
   :doc "Dictionary in Emacs."
@@ -440,21 +504,6 @@
   :bind ("C-c w" . define-word-at-point)
   :delight)
 
-(use-package exec-path-from-shell
-  :doc "MacOS does not start a shell at login. This makes sure
-          that the env variable of shell and GUI Emacs look the
-          same."
-  :ensure t
-  :if (eq system-type 'darwin)
-  :config
-  (when (memq window-system '(mac ns))
-    (exec-path-from-shell-initialize)
-    (exec-path-from-shell-copy-envs
-     '("PATH" "ANDROID_HOME" "LEIN_USERNAME" "LEIN_PASSPHRASE"
-       "LEIN_JVM_OPTS" "NPM_TOKEN" "LANGUAGE" "LANG" "LC_ALL"
-       "MOBY_ENV" "JAVA_8_HOME" "JAVA_7_HOME" "JAVA_HOME" "PS1"
-       "NVM_DIR" "GPG_TTY")))
-  :delight)
 
 (use-package diminish
   :doc "Hide minor modes from mode line"
@@ -517,10 +566,20 @@
     (set-fontset-font t 'symbol (font-spec :family "Apple Color Emoji")
                       nil 'prepend)))
 
-(use-package markdown-mode
+(use-package helm-projectile
   :ensure t
-  :mode (("\\.md\\'" . markdown-mode)
-         ("\\.markdown\\'" . markdown-mode)))
+  :bind (("C-c p" . projectile-command-map))
+  :init (progn (require 'helm-projectile)
+               (projectile-mode)
+               (setq projectile-completion-system 'helm
+                     projectile-switch-project-action 'helm-projectile
+                     projectile-enable-caching t
+                     projectile-mode-line '(:eval (if (file-remote-p default-directory)
+                                                      " "
+                                                    (format " Ptl[%s]"
+                                                            (projectile-project-name)))))
+               (helm-projectile-on))
+  :delight)
 
 
 ;; ───────────────────────────────────── Code editing ─────────────────────────────────────
@@ -528,8 +587,13 @@
 (use-package company
   :doc "COMplete ANYthing"
   :ensure t
+  :init (progn
+          (add-hook 'after-init-hook 'global-company-mode)
+          (setq-default company-lighter " cmp")
+          (setq company-idle-delay 0)
+          (global-company-mode t))
   :bind (:map
-         global-map
+         company-active-map
          ("TAB" . company-complete-common-or-cycle)
          ;; Use hippie expand as secondary auto complete. It is useful as it is
          ;; 'buffer-content' aware (it uses all buffers for that).
@@ -538,8 +602,7 @@
          ("C-n" . company-select-next)
          ("C-p" . company-select-previous))
   :config
-  (setq company-idle-delay 0.1)
-  (global-company-mode t)
+
 
   ;; Configure hippie expand as well.
   (setq hippie-expand-try-functions-list
@@ -550,6 +613,14 @@
           try-complete-lisp-symbol))
 
   :delight)
+
+
+;; Highlight symbol at point
+(use-package idle-highlight-mode
+  :ensure t
+  :config (progn (add-hook 'clojure-mode-hook (lambda ()  (idle-highlight-mode t)))
+                 (add-hook 'emacs-lisp-mode-hook (lambda ()  (idle-highlight-mode t)))))
+
 
 (use-package paredit
   :doc "Better handling of paranthesis when writing Lisp"
@@ -568,6 +639,31 @@
   :bind (("M-[" . paredit-wrap-square)
          ("M-{" . paredit-wrap-curly))
   :delight)
+
+
+(use-package paxedit
+  :ensure t
+  :init (add-hook 'clojure-mode-hook 'paxedit-mode)
+        (add-hook 'emacs-lisp-mode-hook 'paxedit-mode)
+  :bind (("M-<right>" . paxedit-transpose-forward)
+         ("M-<left>". paxedit-transpose-backward)
+         ("M-<up>" . paxedit-backward-up)
+         ("M-<down>" . paxedit-backward-end)
+         ("M-b" . paxedit-previous-symbol)
+         ("M-f" . paxedit-next-symbol)
+         ("C-%" . paxedit-copy)
+         ("C-&" . paxedit-kill)
+         ("C-*" . paxedit-delete)
+         ("C-^" . paxedit-sexp-raise)
+         ("M-u" . paxedit-symbol-change-case)
+         ("C-@" . paxedit-symbol-copy)
+         ("C-#" . paxedit-symbol-kill))
+  :delight)
+
+(use-package rainbow-identifiers
+  :ensure t
+  :init (add-hook 'prog-mode-hook 'rainbow-identifiers-mode))
+
 
 (use-package rainbow-delimiters
   :doc "Colorful paranthesis matching"
@@ -597,11 +693,28 @@
                'yas-hippie-try-expand)
   :delight)
 
+
+;; ──────────────────────────────── Programming languages ───────────────────────────────
 
-(use-package expand-region
-  :doc "Better navigation between nested expressions."
+(use-package projectile :ensure t)
+(use-package flycheck :ensure t)
+(use-package yasnippet
   :ensure t
-  :bind ("C-c =" . er/expand-region))
+  :config (yas-global-mode))
+;; (use-package lsp-mode :ensure t)
+;; (use-package hydra :ensure t)
+;; (use-package lsp-ui :ensure t)
+;; (use-package lsp-java :ensure t
+;;   :config (add-hook 'java-mode-hook 'lsp))
+
+;; (use-package dap-mode
+;;   :ensure t :after lsp-mode
+;;   :config
+;;   (dap-mode t)
+;;   (dap-ui-mode t))
+
+;; (use-package dap-java :after (lsp-java))
+
 
 
 ;; ──────────────────────────────── Programming languages ───────────────────────────────
@@ -661,8 +774,33 @@
   ;; Go right to the REPL buffer when it's finished connecting
   (setq cider-repl-pop-to-buffer-on-connect t)
 
+
+  (setq cider-repl-history-size most-positive-fixnum
+        nrepl-hide-special-buffers t
+        cider-auto-jump-to-error nil
+        cider-use-fringe-indicators nil
+        cider-stacktrace-default-filters '(tooling dup)
+        cider-stacktrace-fill-column 80
+        cider-test-show-report-on-success t
+        cider-font-lock-dynamically nil
+        cider-prefer-local-resources t
+        cider-repl-display-in-current-window nil
+        cider-eval-result-prefix ";; => "
+        cider-use-overlays t
+        cider-prompt-save-file-on-load t
+        cider-repl-prompt-function 'cider-repl-prompt-on-newline
+        nrepl-buffer-name-separator "-"
+        nrepl-buffer-name-show-port t
+        cider-annotate-completion-candidates t
+        cider-completion-annotations-include-ns 'always
+        cider-show-error-buffer 'always
+        cider-apropos-actions
+        '(("find-def" . cider--find-var)
+          ("display-doc" . cider-doc-lookup)
+          ("lookup-on-grimoire" . cider-grimoire-lookup)))
+
+
   ;; When there's a cider error, show its buffer and switch to it
-  (setq cider-show-error-buffer t)
   (setq cider-auto-select-error-buffer t)
 
   ;; Where to store the cider history.
@@ -768,22 +906,47 @@
   (global-eldoc-mode t)
   :delight)
 
-(use-package python
-  :ensure t
-  :custom
-  (python-indent-offset 4))
 
-(use-package anaconda-mode
-  :ensure t
-  :diminish anaconda-mode
-  :hook python-mode
-  :custom (python-indent-offset 4))
+
+;; ──────────────────────────────────── Custom config ───────────────────────────────────
 
-(use-package company-anaconda
-  :ensure t
-  :after (company anaconda-mode)
-  :config (add-hook 'python-mode-hook
-                    (lambda () (add-to-list 'company-backends 'company-anaconda))))
+(setq ring-bell-function 'ignore)
+(setq confirm-nonexistent-file-or-buffer nil)
+(set-default 'truncate-lines t)
+
+(global-set-key (kbd "C-a") 'back-to-indentation-or-beginning-of-line)
+(global-set-key (kbd "C-7") 'comment-or-uncomment-current-line-or-region)
+(global-set-key (kbd "C-6") 'linum-mode)
+(global-set-key (kbd "C-v") 'scroll-up-five)
+(global-set-key (kbd "M-O") 'mode-line-other-buffer)
+(global-set-key (kbd "C-j") 'newline-and-indent)
+(global-set-key (kbd "M-g") 'goto-line)
+(global-set-key (kbd "M-n") 'open-line-below)
+(global-set-key (kbd "M-j") 'join-line-or-lines-in-region)
+(global-set-key (kbd "M-p") 'open-line-above)
+(global-set-key (kbd "M-+") 'text-scale-increase)
+(global-set-key (kbd "M-_") 'text-scale-decrease)
+(global-set-key (kbd "M-v") 'scroll-down-five)
+(global-set-key (kbd "M-k") 'kill-this-buffer)
+(global-set-key (kbd "M-o") 'other-window)
+(global-set-key (kbd "C-c s") 'swap-windows)
+(global-set-key (kbd "C-c r") 'rename-buffer-and-file)
+
+
+(require 'saveplace)
+(save-place-mode)
+
+
+;; Smooth scrolling
+(setq redisplay-dont-pause t
+      scroll-margin 1
+      scroll-step 1
+      scroll-conservatively 10000
+      scroll-preserve-screen-position 1)
+
+
+(setq display-time-24hr-format nil)
+(display-time-mode +1)
 
 
 ;; ──────────────────────────────────── Look and feel ───────────────────────────────────
@@ -865,60 +1028,36 @@
 
 (use-package "faces"
   :config
-  (set-face-attribute 'default nil :height 140)
+  (if (eq system-type 'darwin)
+      (set-face-attribute 'default nil :height 190)
+    (set-face-attribute 'default nil :height 160))
+
   ;; Use the 'Fira Code' if available
   (when (not (eq system-type 'windows-nt))
-    (when (member "Fira Code" (font-family-list))
+    (when (member "Fantasque Sans Mono" (font-family-list))
+      (set-frame-font "Fantasque Sans Mono"))))
 
-      ;; Fira code legatures
-      (let ((alist '((33 . ".\\(?:\\(?:==\\|!!\\)\\|[!=]\\)")
-                     (35 . ".\\(?:###\\|##\\|_(\\|[#(?[_{]\\)")
-                     (36 . ".\\(?:>\\)")
-                     (37 . ".\\(?:\\(?:%%\\)\\|%\\)")
-                     (38 . ".\\(?:\\(?:&&\\)\\|&\\)")
-                     ;; (42 . ".\\(?:\\(?:\\*\\*/\\)\\|\\(?:\\*[*/]\\)\\|[*/>]\\)")
-                     (43 . ".\\(?:\\(?:\\+\\+\\)\\|[+>]\\)")
-                     ;; Causes "error in process filter: Attempt to shape unibyte text".
-                     (45 . ".\\(?:\\(?:-[>-]\\|<<\\|>>\\)\\|[<>}~-]\\)")
-                     ;; Fira code page said that this causes an error in Mojave.
-                     ;; (46 . ".\\(?:\\(?:\\.[.<]\\)\\|[.=-]\\)")
-                     (47 . ".\\(?:\\(?:\\*\\*\\|//\\|==\\)\\|[*/=>]\\)")
-                     (48 . ".\\(?:x[a-zA-Z]\\)")
-                     ;; Grouping ';' and ':' in groups of 3 causes occur to break. Disable it.
-                     ;; (58 . ".\\(?:::\\|[:=]\\)")
-                     ;; (59 . ".\\(?:;;\\|;\\)")
-                     (60 . ".\\(?:\\(?:!--\\)\\|\\(?:~~\\|->\\|\\$>\\|\\*>\\|\\+>\\|--\\|<[<=-]\\|=[<=>]\\||>\\)\\|[*$+~/<=>|-]\\)")
-                     ;; (61 . ".\\(?:\\(?:/=\\|:=\\|<<\\|=[=>]\\|>>\\)\\|[<=>~]\\)")
-                     (62 . ".\\(?:\\(?:=>\\|>[=>-]\\)\\|[=>-]\\)")
-                     (63 . ".\\(?:\\(\\?\\?\\)\\|[:=?]\\)")
-                     (91 . ".\\(?:]\\)")
-                     (92 . ".\\(?:\\(?:\\\\\\\\\\)\\|\\\\\\)")
-                     (94 . ".\\(?:=\\)")
-                     (119 . ".\\(?:ww\\)")
-                     (123 . ".\\(?:-\\)")
-                     (124 . ".\\(?:\\(?:|[=|]\\)\\|[=>|]\\)")
-                     (126 . ".\\(?:~>\\|~~\\|[>=@~-]\\)"))))
-        (dolist (char-regexp alist)
-          (set-char-table-range composition-function-table (car char-regexp)
-                                `([,(cdr char-regexp) 0 font-shape-gstring]))))
+(when window-system (set-frame-size (selected-frame) 165 80))
 
-      (set-frame-font "Fira Code"))))
 
-(use-package emojify
-  :doc "Display Emoji in Emacs."
-  :ensure t
-  :disabled t
-  :init
-  (add-hook 'after-init-hook #'global-emojify-mode)
-  :delight)
+(defun copy-reference ()
+  "Copy current line in file to clipboard as '</path/to/file>:<line-number>'."
+  (interactive)
+  (let ((path-with-line-number
+         (concat (buffer-file-name) ":" (number-to-string (line-number-at-pos)))))
+    (kill-new path-with-line-number)
+    (message (concat path-with-line-number " copied to clipboard"))))
 
 
 ;; ──────────────────────────────────────── *ORG* ───────────────────────────────────────
-(load-file "~/.emacs.d/org-config.el")
+;; (load-file "~/.emacs.d/org-config.el")
 
 ;; Open agenda view when Emacs is started.
-(jump-to-org-agenda)
-(delete-other-windows)
+;; (jump-to-org-agenda)
+;; (delete-other-windows)
+
+(with-eval-after-load 'org (setq org-startup-indented t))
+(add-hook 'org-mode-hook 'turn-on-auto-fill)
 
 (provide 'init)
 

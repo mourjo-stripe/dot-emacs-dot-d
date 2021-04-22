@@ -3,7 +3,7 @@
 
 ;; Add melpa to package archives.
 (add-to-list 'package-archives
-             '("melpa" . "http://melpa.milkbox.net/packages/") t)
+             '("melpa" . "http://melpa.org/packages/") t)
 
 ;; Load and activate emacs packages. Do this first so that the packages are loaded before
 ;; you start trying to modify them.  This also sets the load path.
@@ -56,7 +56,7 @@
 ;; Make the command key behave as 'meta'
 (when (eq system-type 'darwin)
   (setq mac-command-modifier 'meta)
-  (setq mac-right-command-modifier 'hyper)
+  (setq mac-right-command-modifier 'meta)
   (setq delete-by-moving-to-trash t))
 
 
@@ -250,7 +250,7 @@
 (use-package ace-jump-mode
   :doc "Jump around the visible buffer using 'Head Chars'"
   :ensure t
-  :bind ("C-." . ace-jump-mode)
+  ;; :bind ("C-." . ace-jump-mode)
   :delight)
 
 (use-package dumb-jump
@@ -284,16 +284,16 @@
          ("C-x c r b" . helm-filtered-bookmarks)
          ("C-x c r r" . helm-regexp)
          ;; Helm resume does not allow ignoring some helm commands
-         ;; ("C-x b" . helm-buffers-list)
+         ("C-x b" . helm-buffers-list)
          ("M-y" . helm-show-kill-ring)
          ("C-x c SPC" . helm-all-mark-rings)
          ("C-h SPC" . helm-all-mark-rings)
          ("C-x c r i" . helm-register)
          ("M-i" . helm-imenu)
          ;; Helm resume does not allow ignoring some helm commands
-         ;; ("M-x" . helm-M-x)
+         ("M-x" . helm-M-x)
          ("C-x c b" . helm-resume)
-         ("C-x C-f" . helm-find-files)
+         ;; ("C-x C-f" . helm-find-files)
          ("M-s M-s" . helm-occur))
   :bind (:map helm-map
               ("M-i" . helm-previous-line)
@@ -323,38 +323,10 @@
   :delight)
 
 
-(use-package helm-ag
-  :ensure t
-  :bind (("C-x c g a" . helm-do-ag-project-root)
-         ("C-x c g s" . helm-do-ag)
-         ("C-x c g g" . helm-do-grep-ag))
-  :config (progn (setq helm-ag-insert-at-point 'symbol
-                       helm-ag-fuzzy-match t
-                       helm-truncate-lines t
-                       helm-ag-use-agignore t))
-  :delight)
-
-
-(use-package helm-projectile
-  :ensure t
-  :bind (("C-c p" . projectile-command-map))
-  :config (progn (require 'helm-projectile)
-                 (projectile-mode)
-                 (setq projectile-completion-system 'helm
-                       projectile-switch-project-action 'helm-projectile
-                       projectile-enable-caching t
-                       projectile-mode-line '(:eval (if (file-remote-p default-directory)
-                                                        " "
-                                                      (format " Ptl[%s]"
-                                                              (projectile-project-name)))))
-                 (helm-projectile-on))
-  :delight)
-
-
 (use-package counsel
   :doc "Ivy enhanced Emacs commands"
   :ensure t
-  :bind (("M-x" . counsel-M-x)
+  :bind (;; ("M-x" . counsel-M-x)
          ("C-x C-f" . counsel-find-file)
          ("C-'" . counsel-imenu)
          ("C-c s" . counsel-rg)
@@ -465,6 +437,34 @@
 
   :bind ("H-l" . flyspell-learn-word-at-point))
 
+
+(use-package helm-projectile
+  :ensure t
+  :bind (("C-c p" . projectile-command-map))
+  :init (progn (require 'helm-projectile)
+               (projectile-mode)
+               (setq projectile-completion-system 'helm
+                     projectile-switch-project-action 'helm-projectile
+                     projectile-enable-caching t
+                     projectile-mode-line '(:eval (if (file-remote-p default-directory)
+                                                      " "
+                                                    (format " Ptl[%s]"
+                                                            (projectile-project-name)))))
+               (helm-projectile-on))
+  :delight)
+
+
+(use-package helm-ag
+  :ensure t
+  :bind (("C-x c g a" . helm-do-ag-project-root)
+         ("C-x c g s" . helm-do-ag)
+         ("C-x c g g" . helm-do-grep-ag))
+  :config (progn (setq helm-ag-insert-at-point 'symbol
+                       helm-ag-fuzzy-match t
+                       helm-truncate-lines t
+                       helm-ag-use-agignore t))
+  :delight)
+
 
 ;; ───────────────────────────────────── Code editing ─────────────────────────────────────
 
@@ -499,10 +499,21 @@
   :delight)
 
 
+(use-package highlight-symbol
+  :doc "Highlight and jump to symbols"
+  :ensure t
+  :config
+  (set-face-background 'highlight-symbol-face (face-background 'highlight))
+  (add-hook 'prog-mode-hook 'highlight-symbol-mode)
+  :bind (("M-n" . highlight-symbol-next)
+         ("M-p" . highlight-symbol-prev))
+  :delight)
+
 ;; Highlight symbol at point
 (use-package idle-highlight-mode
   :ensure t
-  :config (progn (add-hook 'clojure-mode-hook (lambda ()  (idle-highlight-mode t)))
+  :config (progn (setq highlight-symbol-idle-delay 0.5)
+                 (add-hook 'clojure-mode-hook (lambda ()  (idle-highlight-mode t)))
                  (add-hook 'emacs-lisp-mode-hook (lambda ()  (idle-highlight-mode t)))))
 
 
@@ -546,7 +557,11 @@
 
 (use-package rainbow-identifiers
   :ensure t
-  :init (add-hook 'prog-mode-hook 'rainbow-identifiers-mode))
+  :init (progn (add-hook 'prog-mode-hook 'rainbow-identifiers-mode)
+               (setq rainbow-identifiers-faces-to-override '(font-lock-variable-name-face
+                                                             font-lock-function-name-face
+                                                             font-lock-type-face
+                                                             elixir-atom-face))))
 
 
 (use-package rainbow-delimiters
@@ -557,16 +572,7 @@
   (add-hook 'prog-mode-hook 'rainbow-delimiters-mode)
   :delight)
 
-(use-package highlight-symbol
-  :doc "Highlight and jump to symbols"
-  :ensure t
-  :config
-  (set-face-background 'highlight-symbol-face (face-background 'highlight))
-  (setq highlight-symbol-idle-delay 0.5)
-  (add-hook 'prog-mode-hook 'highlight-symbol-mode)
-  :bind (("M-n" . highlight-symbol-next)
-         ("M-p" . highlight-symbol-prev))
-  :delight)
+
 
 (use-package yasnippet
   :ensure t
@@ -579,6 +585,58 @@
 
 
 ;; ──────────────────────────────── Programming languages ───────────────────────────────
+
+(use-package projectile :ensure t)
+(use-package flycheck :ensure t)
+(use-package yasnippet
+  :ensure t
+  :config (yas-global-mode))
+
+
+
+
+
+(use-package lsp-mode
+  :commands lsp
+  :ensure t
+  :diminish lsp-mode
+  :init
+  ;; set prefix for lsp-command-keymap (few alternatives - "C-l", "C-c l")
+  (progn (setq lsp-keymap-prefix "C-c l")
+         (add-to-list 'exec-path "/Users/mourjosen/software/elixir-ls-1.11")
+         (add-to-list 'exec-path "/Users/mourjosen/Library/Python/3.8/bin"))
+  :hook (progn ;; replace XXX-mode with concrete major-mode(e. g. python-mode)
+          (elixir-mode . lsp)
+          (python-mode . lsp)
+          ;; if you want which-key integration
+          (lsp-mode . lsp-enable-which-key-integration)))
+
+;; optionally
+;;; (use-package lsp-ui :commands lsp-ui-mode)
+;; if you are helm user
+(use-package helm-lsp :commands helm-lsp-workspace-symbol)
+;; if you are ivy user
+(use-package lsp-ivy :commands lsp-ivy-workspace-symbol)
+(use-package lsp-treemacs :commands lsp-treemacs-errors-list)
+
+
+(use-package dap-mode
+  :ensure t
+  :commands dap-mode)
+
+(require 'dap-elixir)
+;; optionally if you want to use debugger
+(dap-ui-mode)
+
+;; (use-package dap-LANGUAGE) to load the dap adapter for your language
+
+
+
+
+;; (use-package hydra :ensure t)
+;; (use-package dap-java :after (lsp-java))
+
+
 (use-package clojure-mode
   :doc "A major mode for editing Clojure code"
   :ensure t
@@ -682,6 +740,12 @@
                       (clj-kondo-cljc . clojure-joker)
                       (clj-kondo-edn . edn-joker)))
     (flycheck-add-next-checker (car checkers) (cons 'error (cdr checkers))))
+  :delight)
+
+(use-package flycheck-credo
+  :ensure t
+  :after elixir-mode
+  :init (add-hook 'elixir-mode-hook 'mix-minor-mode)
   :delight)
 
 (use-package clj-refactor
@@ -832,6 +896,54 @@
     (when (member "Fantasque Sans Mono" (font-family-list))
       (set-frame-font "Fantasque Sans Mono"))))
 
+
+(use-package elixir-mode
+  :ensure t
+  :init
+  (add-hook 'elixir-mode-hook
+            (lambda ()
+              (push '(">=" . ?\u2265) prettify-symbols-alist)
+              (push '("<=" . ?\u2264) prettify-symbols-alist)
+              (push '("!=" . ?\u2260) prettify-symbols-alist)
+              (push '("==" . ?\u2A75) prettify-symbols-alist)
+              (push '("=~" . ?\u2245) prettify-symbols-alist)
+              (push '("<-" . ?\u2190) prettify-symbols-alist)
+              (push '("->" . ?\u2192) prettify-symbols-alist)
+              (push '("<-" . ?\u2190) prettify-symbols-alist)
+              (push '("|>" . ?\u25B7) prettify-symbols-alist)))
+  (add-hook 'elixir-mode-hook (lambda ()  (idle-highlight-mode t))))
+
+(use-package mix
+  :ensure t
+  :init (add-hook 'elixir-mode-hook 'mix-minor-mode))
+
+
+
+
+(use-package reformatter
+  :ensure t
+  :config
+                                        ; Adds a reformatter configuration called "+elixir-format"
+                                        ; This uses "mix format -"
+  (reformatter-define +elixir-format
+    :program "mix"
+    :args '("format" "-"))
+                                        ; defines a function that looks for the .formatter.exs file used by mix format
+  (defun +set-default-directory-to-mix-project-root (original-fun &rest args)
+    (if-let* ((mix-project-root (and buffer-file-name
+                                     (locate-dominating-file buffer-file-name
+                                                             ".formatter.exs"))))
+        (let ((default-directory mix-project-root))
+          (apply original-fun args))
+      (apply original-fun args)))
+                                        ; adds an advice to the generated function +elxir-format-region that sets the proper root dir
+                                        ; mix format needs to be run from the root directory otherwise it wont use the formatter configuration
+  (advice-add '+elixir-format-region :around #'+set-default-directory-to-mix-project-root)
+                                        ; Adds a hook to the major-mode that will add the generated function +elixir-format-on-save-mode
+                                        ; So, every time we save an elixir file it will try to find a .formatter.exs and then run mix format from
+                                        ; that file's directory
+  (add-hook 'elixir-mode-hook #'+elixir-format-on-save-mode))
+
 (when window-system (set-frame-size (selected-frame) 165 80))
 
 
@@ -855,5 +967,6 @@
 (add-hook 'org-mode-hook 'turn-on-auto-fill)
 
 (provide 'init)
+(server-start)
 
 ;;; init.el ends here

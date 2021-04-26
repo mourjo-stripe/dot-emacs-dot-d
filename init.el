@@ -365,17 +365,6 @@
   (ivy-rich-mode 1)
   :delight)
 
-(use-package git-gutter
-  :doc "Shows modified lines"
-  :ensure t
-  :bind (("C-x q" . git-gutter:revert-hunk)
-         ("C-c C-s" . git-gutter:stage-hunk)
-         ("C-x p" . git-gutter:previous-hunk)
-         ("C-x n" . git-gutter:next-hunk)
-         ("C-x C-p" . git-gutter:popup-hunk))
-  :delight)
-
-
 (use-package git-timemachine
   :doc "Go through git history in a file"
   :ensure t
@@ -609,7 +598,8 @@
           (elixir-mode . lsp)
           (python-mode . lsp)
           ;; if you want which-key integration
-          (lsp-mode . lsp-enable-which-key-integration)))
+          (lsp-mode . lsp-enable-which-key-integration))
+  :custom (lsp-headerline-breadcrumb-enable nil))
 
 ;; optionally
 ;;; (use-package lsp-ui :commands lsp-ui-mode)
@@ -760,6 +750,9 @@
   (add-hook 'clojure-mode-hook #'my-clojure-mode-hook)
 
   :delight)
+
+(use-package flycheck-dialyxir
+  :ensure t)
 
 (use-package eldoc
   :doc "Easily accessible documentation for Elisp"
@@ -944,6 +937,19 @@
                                         ; that file's directory
   (add-hook 'elixir-mode-hook #'+elixir-format-on-save-mode))
 
+(use-package exunit
+  :ensure t)
+
+(use-package protobuf-mode
+  :ensure t)
+
+(use-package diff-hl
+  :ensure t
+    :bind (:map diff-hl-mode-map
+                ("C-x p" . diff-hl-previous-hunk)
+                ("C-x n" . diff-hl-next-hunk))
+  :config (global-diff-hl-mode +1))
+
 (when window-system (set-frame-size (selected-frame) 165 80))
 
 
@@ -965,6 +971,9 @@
 
 (with-eval-after-load 'org (setq org-startup-indented t))
 (add-hook 'org-mode-hook 'turn-on-auto-fill)
+
+(when (file-exists-p custom-file)
+  (load custom-file))
 
 (provide 'init)
 (server-start)

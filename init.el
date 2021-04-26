@@ -242,8 +242,12 @@
 (use-package magit
   :doc "Git integration for Emacs"
   :ensure t
-  :config (add-hook 'magit-mode-hook
-                    (lambda () (hl-line-mode -1)))
+  :config (progn
+            (add-hook 'magit-mode-hook
+                      (lambda () (hl-line-mode -1)))
+            (add-hook 'magit-pre-refresh-hook 'diff-hl-magit-pre-refresh)
+            (add-hook 'magit-post-refresh-hook 'diff-hl-magit-post-refresh))
+
   :bind ("C-x g" . magit-status)
   :delight)
 

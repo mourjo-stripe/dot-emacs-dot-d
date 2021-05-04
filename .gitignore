@@ -7,3 +7,10 @@ projectile-bookmarks.eld
 transient/
 places
 projectile.cache
+.DS_Store
+.cache/
+.dap-breakpoints
+.lsp-session-v1
+.mc-lists.el
+bookmarks
+eshell/

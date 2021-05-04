@@ -975,6 +975,8 @@
 
 (with-eval-after-load 'org (setq org-startup-indented t))
 (add-hook 'org-mode-hook 'turn-on-auto-fill)
+(add-hook 'org-mode-hook (lambda () (require 'org-tempo)))
+(add-hook 'prog-mode-hook 'hl-line-mode)
 
 (when (file-exists-p custom-file)
   (load custom-file))

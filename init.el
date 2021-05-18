@@ -260,7 +260,10 @@
 (use-package dumb-jump
   :doc "Dumb ag version of M-."
   :ensure t
-  :bind ("C-M-." . dumb-jump-go)
+  :bind ("C-M-." . dumb-jump-go) ;; this is obsolete but still works the best ^_^
+  :config (progn
+            (add-hook 'xref-backend-functions #'dumb-jump-xref-activate)
+            (setq xref-show-definitions-function #'xref-show-definitions-completing-read))
   :delight)
 
 (use-package which-key
@@ -914,9 +917,6 @@
   :ensure t
   :init (add-hook 'elixir-mode-hook 'mix-minor-mode))
 
-
-
-
 (use-package reformatter
   :ensure t
   :config
@@ -949,10 +949,14 @@
 
 (use-package diff-hl
   :ensure t
-    :bind (:map diff-hl-mode-map
-                ("C-x p" . diff-hl-previous-hunk)
-                ("C-x n" . diff-hl-next-hunk))
+  :bind (:map diff-hl-mode-map
+              ("C-x p" . diff-hl-previous-hunk)
+              ("C-x n" . diff-hl-next-hunk))
   :config (global-diff-hl-mode +1))
+
+
+(use-package pdf-tools
+  :ensure t)
 
 (when window-system (set-frame-size (selected-frame) 165 80))
 

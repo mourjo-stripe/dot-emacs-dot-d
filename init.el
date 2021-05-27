@@ -587,7 +587,7 @@
 (use-package yasnippet
   :ensure t
   :config (yas-global-mode))
-
+(use-package elixir-yasnippets :ensure t)
 
 
 
@@ -600,7 +600,8 @@
   ;; set prefix for lsp-command-keymap (few alternatives - "C-l", "C-c l")
   (progn (setq lsp-keymap-prefix "C-c l")
          (add-to-list 'exec-path "/Users/mourjosen/software/elixir-ls-1.11")
-         (add-to-list 'exec-path "/Users/mourjosen/Library/Python/3.8/bin"))
+         (add-to-list 'exec-path "/Users/mourjosen/Library/Python/3.8/bin")
+         (setq lsp-enable-file-watchers nil))
   :hook (progn ;; replace XXX-mode with concrete major-mode(e. g. python-mode)
           (elixir-mode . lsp)
           (python-mode . lsp)
@@ -954,9 +955,22 @@
               ("C-x n" . diff-hl-next-hunk))
   :config (global-diff-hl-mode +1))
 
+;; Persist history over Emacs restarts.
+(use-package savehist
+  :init (savehist-mode)
+  :ensure t)
+
 
 (use-package pdf-tools
   :ensure t)
+
+(use-package inf-elixir
+  :ensure t
+  :bind (("C-c i i" . 'inf-elixir)
+         ("C-c i p" . 'inf-elixir-project)
+         ("C-c i l" . 'inf-elixir-send-line)
+         ("C-c i r" . 'inf-elixir-send-region)
+         ("C-c i b" . 'inf-elixir-send-buffer)))
 
 (when window-system (set-frame-size (selected-frame) 165 80))
 

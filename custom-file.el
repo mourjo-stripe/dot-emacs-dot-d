@@ -15,4 +15,6 @@
  ;; If there is more than one, they won't work right.
  '(diff-hl-change ((t (:background "#b3a140"))))
  '(diff-hl-delete ((t (:background "salmon4"))))
- '(diff-hl-insert ((t (:background "#6c9470")))))
+ '(diff-hl-insert ((t (:background "#6c9470"))))
+ '(diff-refine-added ((t (:background "DarkOliveGreen4" :foreground "White"))))
+ '(diff-refine-removed ((t (:background "LightPink4" :foreground "white")))))

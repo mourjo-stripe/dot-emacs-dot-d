@@ -243,6 +243,7 @@
   :doc "Git integration for Emacs"
   :ensure t
   :config (progn
+            (setf magit-diff-refine-hunk t)
             (add-hook 'magit-mode-hook
                       (lambda () (hl-line-mode -1)))
             (add-hook 'magit-pre-refresh-hook 'diff-hl-magit-pre-refresh)

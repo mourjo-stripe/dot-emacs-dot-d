@@ -606,6 +606,7 @@
   :hook (progn ;; replace XXX-mode with concrete major-mode(e. g. python-mode)
           (elixir-mode . lsp)
           (python-mode . lsp)
+          (javascript-mode . lsp)
           ;; if you want which-key integration
           (lsp-mode . lsp-enable-which-key-integration))
   :custom (lsp-headerline-breadcrumb-enable nil))
@@ -807,7 +808,7 @@
       scroll-conservatively 10000
       scroll-preserve-screen-position 1)
 
-
+(setq display-time-default-load-average nil)
 (setq display-time-24hr-format nil)
 (display-time-mode +1)
 
@@ -886,14 +887,14 @@
   :doc "Better mode line"
   :ensure t
   :config
-  (powerline-center-theme)
+  (powerline-default-theme)
   :delight)
 
 (use-package "faces"
   :config
   (set-face-attribute 'default nil :height 190)
 
-  ;; Use the 'Fira Code' if available
+  ;; Use the 'Fantasque Sans Mono' if available
   (when (not (eq system-type 'windows-nt))
     (when (member "Fantasque Sans Mono" (font-family-list))
       (set-frame-font "Fantasque Sans Mono"))))
@@ -991,6 +992,48 @@
 ;; Open agenda view when Emacs is started.
 ;; (jump-to-org-agenda)
 ;; (delete-other-windows)
+
+
+
+(defvar mode-line-cleaner-alist
+  `((auto-complete-mode . "")
+    (yas-minor-mode . "")
+    (paredit-mode . "")
+    (eldoc-mode . "")
+    (abbrev-mode . "")
+    (undo-tree-mode . "")
+    (volatile-highlights-mode . "")
+    (elisp-slime-nav-mode . "")
+    (nrepl-mode . "")
+    (nrepl-interaction-mode . "")
+    (mix-mode . "")
+    (hi-lock-mode . "")
+    ;; Major modes
+    (clojure-mode . "")
+    (hi-lock-mode . "")
+    (python-mode . "")
+    (emacs-lisp-mode . "")
+    (elixir-mode . "")
+    (markdown-mode . "")
+    (vc-mode . "")
+    (vc-git . "")))
+
+
+(defun clean-mode-line ()
+  "Clean up mode line."
+  (interactive)
+  (loop for cleaner in mode-line-cleaner-alist
+        do (let* ((mode (car cleaner))
+                 (mode-str (cdr cleaner))
+                 (old-mode-str (cdr (assq mode minor-mode-alist))))
+             (when old-mode-str
+                 (setcar old-mode-str mode-str))
+               ;; major mode
+             (when (eq mode major-mode)
+               (setq mode-name mode-str)))))
+
+
+(add-hook 'after-change-major-mode-hook 'clean-mode-line)
 
 (with-eval-after-load 'org (setq org-startup-indented t))
 (add-hook 'org-mode-hook 'turn-on-auto-fill)

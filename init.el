@@ -591,6 +591,56 @@
 (use-package elixir-yasnippets :ensure t)
 
 
+;; https://www.youtube.com/watch?v=0zuYCEzrchk
+(use-package rjsx-mode
+  :ensure t
+  :mode "\\.js\\'"
+  ;; :config
+  ;; (setq js2-mode-show-parse-errors nil
+  ;;       js2-mode-show-strict-warnings nil
+  ;;       js2-basic-offset 2
+  ;;       js-indent-level 2)
+  ;; (setq-local flycheck-disabled-checkers (cl-union flycheck-disabled-checkers
+  ;;                                                  '(javascript-jshint)))
+  ;; (electric-pair-mode 1)
+  )
+
+(use-package add-node-modules-path
+  :ensure t
+  :hook (((js2-mode rjsx-mode) . add-node-modules-path)))
+
+;; npm install -g prettier
+(use-package prettier-js
+  :ensure t
+  :after (rjsx-mode)
+  :hook (rjsx-mode . prettier-js-mode))
+
+;; (defun setup-tide-mode ()
+;;   "Setup TIDE: Typescript IDE."
+;;   (interactive)
+;;   (tide-setup)
+;;   (flycheck-mode +1)
+;;   (setq flycheck-check-syntax-automatically '(save mode-enabled))
+;;   (eldoc-mode +1)
+;;   (tide-hl-identifier-mode +1)
+;;   ;; company is an optional dependency. You have to
+;;   ;; install it separately via package-install
+;;   ;; `M-x package-install [ret] company`
+;;   (company-mode +1))
+
+;; (use-package tide
+;;   :ensure t
+;;   :after (rjsx-mode company flycheck)
+;;   :hook (rjx-mode  . setup-tide-mode))
+
+;; aligns annotation to the right hand side
+(setq company-tooltip-align-annotations t)
+
+;; formats the buffer before saving
+(add-hook 'before-save-hook 'tide-format-before-save)
+
+;; (add-hook 'typescript-mode-hook #'setup-tide-mode)
+
 
 
 (use-package lsp-mode
@@ -600,24 +650,37 @@
   :init
   ;; set prefix for lsp-command-keymap (few alternatives - "C-l", "C-c l")
   (progn (setq lsp-keymap-prefix "C-c l")
-         (add-to-list 'exec-path "/Users/mourjosen/software/elixir-ls-1.11")
+         ;; (add-to-list 'exec-path "/Users/mourjosen/software/elixir-ls-1.11")
+         ;; (add-to-list 'exec-path "/Users/mourjosen/software/elixir-ls-0.7.0-compiled")
+         ;; (add-to-list 'exec-path "/Users/mourjosen/software/elixir-ls-latest-6a786d7-compiled")
+         (add-to-list 'exec-path "/Users/mourjosen/software/elixir-ls-compiled-442c6982755010f37c5693134056ee57a78ff196")
+
          (add-to-list 'exec-path "/Users/mourjosen/Library/Python/3.8/bin")
          (setq lsp-enable-file-watchers nil))
   :hook (progn ;; replace XXX-mode with concrete major-mode(e. g. python-mode)
           (elixir-mode . lsp)
           (python-mode . lsp)
-          (javascript-mode . lsp)
+          ;;(javascript-mode . lsp)
+          ((js2-mode rjsx-mode) . lsp) ;; npm i -g typescript-language-server; npm i -g typescript
           ;; if you want which-key integration
           (lsp-mode . lsp-enable-which-key-integration))
   :custom (lsp-headerline-breadcrumb-enable nil))
 
 ;; optionally
-;;; (use-package lsp-ui :commands lsp-ui-mode)
+;; (use-package lsp-ui :commands lsp-ui-mode)
 ;; if you are helm user
 (use-package helm-lsp :commands helm-lsp-workspace-symbol)
 ;; if you are ivy user
 (use-package lsp-ivy :commands lsp-ivy-workspace-symbol)
 (use-package lsp-treemacs :commands lsp-treemacs-errors-list)
+
+(use-package company-lsp
+  :defer t
+  :config
+  (setq company-lsp-cache-candidates 'auto
+        company-lsp-async t
+        company-lsp-enable-snippet nil
+        company-lsp-enable-recompletion t))
 
 
 (use-package dap-mode
